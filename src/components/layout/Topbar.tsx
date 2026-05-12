@@ -3,6 +3,7 @@
 import { UserButton } from "@clerk/nextjs";
 import { Bell, Search } from "lucide-react";
 import { MobileNav } from "./MobileNav";
+import { ThemeToggle } from "./ThemeToggle";
 
 interface TopbarProps {
   title?: string;
@@ -29,6 +30,7 @@ export function Topbar({ title }: TopbarProps) {
       </div>
 
       <div className="ml-auto flex items-center gap-3">
+        <ThemeToggle />
         <button className="relative p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
           <Bell className="w-5 h-5" />
         </button>
