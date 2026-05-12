@@ -1,5 +1,6 @@
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
+import { AIShowcase } from "@/components/landing/AIShowcase";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Pricing } from "@/components/landing/Pricing";
 import { CTA } from "@/components/landing/CTA";
@@ -10,6 +11,7 @@ export default function LandingPage() {
     <main className="min-h-screen bg-[var(--voon-bg)]">
       <Hero />
       <Features />
+      <AIShowcase />
       <HowItWorks />
       <Pricing />
       <CTA />
