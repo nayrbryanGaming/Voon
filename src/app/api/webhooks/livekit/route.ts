@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { WebhookReceiver } from "livekit-server-sdk";
+import { WebhookReceiver, WebhookEvent } from "livekit-server-sdk";
 import { prisma } from "@/lib/prisma";
 import { summarizeMeeting, extractActionItems } from "@/lib/anthropic";
 
@@ -12,15 +12,14 @@ export async function POST(req: Request) {
     process.env.LIVEKIT_API_SECRET!
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let event: any;
+  let event: WebhookEvent;
   try {
     event = await Promise.resolve(receiver.receive(body, authorization ?? ""));
   } catch {
     return NextResponse.json({ error: "Invalid webhook" }, { status: 400 });
   }
 
-  const roomName = event?.room?.name ?? event?.roomName;
+  const roomName = event?.room?.name;
   if (!roomName) return NextResponse.json({ success: true });
 
   const meeting = await prisma.meeting.findUnique({ where: { roomId: roomName } });

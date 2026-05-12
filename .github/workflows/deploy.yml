@@ -1,4 +1,4 @@
-name: Deploy to Vercel
+name: CI — Voon
 
 on:
   push:
@@ -7,12 +7,13 @@ on:
     branches: [master, main]
 
 jobs:
-  deploy:
+  ci:
+    name: Type Check & Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -31,7 +32,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
           NEXT_PUBLIC_APP_URL: https://voon.vercel.app
-          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
+          DATABASE_URL: postgresql://p:p@placeholder:5432/voon
 
       - name: Build
         run: npm run build
@@ -47,25 +48,11 @@ jobs:
           NEXT_PUBLIC_LIVEKIT_URL: wss://placeholder.livekit.cloud
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
-          DATABASE_URL: postgresql://placeholder:placeholder@placeholder:5432/placeholder
+          DATABASE_URL: postgresql://p:p@placeholder:5432/voon
           ANTHROPIC_API_KEY: sk-ant-placeholder
           NEXT_PUBLIC_APP_URL: https://voon.vercel.app
 
-      - name: Deploy to Vercel (Production)
-        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
-          working-directory: ./
-
-      - name: Deploy Preview (PR)
-        if: github.event_name == 'pull_request'
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
+# Deployment is handled automatically by Vercel's GitHub Integration.
+# Every push to master/main → Production deployment at voon.vercel.app
+# Every PR → Preview deployment with unique URL
+# Configure at: https://vercel.com/nayrbryangamings-projects/voon/settings/git

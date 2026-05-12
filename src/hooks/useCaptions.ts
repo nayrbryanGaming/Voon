@@ -13,23 +13,19 @@ interface Caption {
 export function useCaptions() {
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [enabled, setEnabled] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const addTranscriptLine = useMeetingStore((s) => s.addTranscriptLine);
 
   const start = useCallback(() => {
-    const w = window as unknown as Record<string, unknown>;
-    const SR = (w.SpeechRecognition || w.webkitSpeechRecognition) as (new () => unknown) | undefined;
-    if (!SR) return;
+    const SpeechRecognitionAPI = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    if (!SpeechRecognitionAPI) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recognition: any = new SR();
+    const recognition = new SpeechRecognitionAPI();
     recognition.continuous = true;
     recognition.interimResults = true;
     recognition.lang = "id-ID";
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const result = event.results[event.results.length - 1];
       const text: string = result[0].transcript;
       const isFinal: boolean = result.isFinal;
