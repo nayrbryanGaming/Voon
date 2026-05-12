@@ -70,6 +70,7 @@ function RoomInner({ meetingId, meetingTitle, isHost, userId }: Omit<MeetingRoom
       {/* Control bar */}
       <ControlBar
         isHost={isHost}
+        meetingId={meetingId}
         onLeave={handleLeave}
         onTogglePanel={setPanel}
         activePanel={panel}

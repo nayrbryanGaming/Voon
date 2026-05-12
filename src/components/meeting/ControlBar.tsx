@@ -7,12 +7,14 @@ import {
 } from "@livekit/components-react";
 import {
   Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, MessageSquare, Users,
-  BarChart2, Brain, Hand, Smile, LogOut, Subtitles,
+  Brain, Hand, Smile, LogOut, Subtitles, Circle, StopCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRecording } from "@/hooks/useRecording";
 
 interface ControlBarProps {
   isHost: boolean;
+  meetingId: string;
   onLeave: () => void;
   onTogglePanel: (panel: "chat" | "participants" | "quiz" | null) => void;
   activePanel: string | null;
@@ -25,6 +27,7 @@ const REACTIONS = ["👋", "👍", "❤️", "😂", "🎉", "🤔", "👏", "�
 
 export function ControlBar({
   isHost,
+  meetingId,
   onLeave,
   onTogglePanel,
   activePanel,
@@ -36,6 +39,7 @@ export function ControlBar({
   const room = useRoomContext();
   const [showReactions, setShowReactions] = useState(false);
   const [sharing, setSharing] = useState(false);
+  const { isRecording, loading: recLoading, startRecording, stopRecording } = useRecording(meetingId);
 
   const isMuted = !localParticipant?.isMicrophoneEnabled;
   const isCamOff = !localParticipant?.isCameraEnabled;
@@ -169,15 +173,31 @@ export function ControlBar({
         <span className="text-xs hidden sm:block">Caption</span>
       </button>
 
-      {/* AI Quiz (host only) */}
+      {/* Host-only controls */}
       {isHost && (
-        <button
-          onClick={onOpenQuiz}
-          className="flex flex-col items-center gap-1 p-3 rounded-xl bg-purple-600/20 text-purple-400 hover:bg-purple-600/30 border border-purple-500/20 transition-colors"
-        >
-          <Brain className="w-5 h-5" />
-          <span className="text-xs hidden sm:block">AI Quiz</span>
-        </button>
+        <>
+          <button
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={recLoading}
+            title={isRecording ? "Hentikan Rekaman" : "Mulai Rekaman"}
+            className={cn(
+              "flex flex-col items-center gap-1 p-3 rounded-xl transition-colors disabled:opacity-50",
+              isRecording
+                ? "bg-red-600/20 text-red-400 border border-red-500/30 hover:bg-red-600/30"
+                : "bg-white/10 text-white hover:bg-white/20"
+            )}
+          >
+            {isRecording ? <StopCircle className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
+            <span className="text-xs hidden sm:block">{isRecording ? "Stop Rec" : "Rekam"}</span>
+          </button>
+          <button
+            onClick={onOpenQuiz}
+            className="flex flex-col items-center gap-1 p-3 rounded-xl bg-purple-600/20 text-purple-400 hover:bg-purple-600/30 border border-purple-500/20 transition-colors"
+          >
+            <Brain className="w-5 h-5" />
+            <span className="text-xs hidden sm:block">AI Quiz</span>
+          </button>
+        </>
       )}
 
       <div className="w-px h-8 bg-white/10" />
