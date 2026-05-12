@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  name      String
+  avatarUrl String?
+  role      UserRole @default(STUDENT)
+  campusId  String?
+  campus    Campus?  @relation(fields: [campusId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  hostedMeetings    Meeting[]    @relation("Host")
+  participations    Participant[]
+  attendanceRecords Attendance[]
+}
+
+enum UserRole {
+  STUDENT
+  LECTURER
+  ADMIN
+}
+
+model Campus {
+  id       String   @id @default(cuid())
+  name     String
+  domain   String?  @unique
+  logoUrl  String?
+  users    User[]
+  meetings Meeting[]
+}
+
+model Meeting {
+  id              String        @id @default(cuid())
+  title           String
+  description     String?
+  roomId          String        @unique @default(cuid())
+  hostId          String
+  host            User          @relation("Host", fields: [hostId], references: [id])
+  campusId        String?
+  campus          Campus?       @relation(fields: [campusId], references: [id])
+  startTime       DateTime
+  endTime         DateTime?
+  duration        Int?
+  status          MeetingStatus @default(SCHEDULED)
+  isRecorded      Boolean       @default(false)
+  recordingUrl    String?
+  maxParticipants Int?
+  isPublic        Boolean       @default(false)
+  inviteCode      String        @unique @default(cuid())
+  createdAt       DateTime      @default(now())
+
+  participants Participant[]
+  attendance   Attendance[]
+  transcript   Transcript?
+  summary      MeetingSummary?
+  polls        Poll[]
+  whiteboardId String?
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
+}
+
+model Participant {
+  id        String          @id @default(cuid())
+  meetingId String
+  meeting   Meeting         @relation(fields: [meetingId], references: [id])
+  userId    String
+  user      User            @relation(fields: [userId], references: [id])
+  joinedAt  DateTime        @default(now())
+  leftAt    DateTime?
+  role      ParticipantRole @default(ATTENDEE)
+  isMuted   Boolean         @default(false)
+  isVideoOn Boolean         @default(true)
+
+  @@unique([meetingId, userId])
+}
+
+enum ParticipantRole {
+  HOST
+  CO_HOST
+  PRESENTER
+  ATTENDEE
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  meetingId String
+  meeting   Meeting          @relation(fields: [meetingId], references: [id])
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  joinedAt  DateTime
+  leftAt    DateTime?
+  duration  Int?
+  status    AttendanceStatus @default(PRESENT)
+
+  @@unique([meetingId, userId])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  LATE
+  ABSENT
+  EXCUSED
+}
+
+model Transcript {
+  id        String   @id @default(cuid())
+  meetingId String   @unique
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  content   String
+  speakers  Json?
+  createdAt DateTime @default(now())
+}
+
+model MeetingSummary {
+  id          String   @id @default(cuid())
+  meetingId   String   @unique
+  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+  summary     String
+  keyPoints   String[]
+  actionItems String[]
+  topics      String[]
+  sentiment   String?
+  createdAt   DateTime @default(now())
+}
+
+model Poll {
+  id        String   @id @default(cuid())
+  meetingId String
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  question  String
+  options   String[]
+  votes     Json?
+  isAnon    Boolean  @default(false)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

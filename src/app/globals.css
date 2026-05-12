@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --voon-primary: #2563EB;
+  --voon-primary-light: #3B82F6;
+  --voon-primary-dark: #1D4ED8;
+  --voon-accent: #10B981;
+  --voon-accent-warm: #F59E0B;
+  --voon-danger: #EF4444;
+  --voon-bg: #0A0F1E;
+  --voon-bg-card: #111827;
+  --voon-bg-elevated: #1F2937;
+  --voon-border: rgba(255,255,255,0.08);
+  --voon-text: #F9FAFB;
+  --voon-text-muted: #9CA3AF;
+  --voon-text-subtle: #4B5563;
+  --voon-gradient-hero: linear-gradient(135deg, #0A0F1E 0%, #0F172A 40%, #0D1B4B 100%);
+  --voon-gradient-card: linear-gradient(145deg, rgba(37,99,235,0.1), rgba(16,185,129,0.05));
+  --voon-gradient-glow: radial-gradient(ellipse at center, rgba(37,99,235,0.15) 0%, transparent 70%);
+
+  --background: 222 47% 6%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 8%;
+  --card-foreground: 210 40% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 47% 6%;
+  --secondary: 222 47% 14%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 222 47% 14%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 160 84% 39%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 222 47% 14%;
+  --input: 222 47% 14%;
+  --ring: 217 91% 60%;
+  --radius: 0.5rem;
+}
+
+* {
+  border-color: var(--voon-border);
+}
+
+body {
+  background-color: var(--voon-bg);
+  color: var(--voon-text);
+  font-family: 'Geist', system-ui, sans-serif;
+}
+
+/* Grain texture overlay */
+.grain-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Speaking animation */
+@keyframes speaking-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+  50% { box-shadow: 0 0 0 6px rgba(37, 99, 235, 0); }
+}
+
+.speaking-indicator {
+  animation: speaking-pulse 1.5s ease-in-out infinite;
+}
+
+/* Live badge pulse */
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.live-dot {
+  animation: live-pulse 1.5s ease-in-out infinite;
+}
+
+/* Particle animation for landing */
+@keyframes float-particle {
+  0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+  33% { transform: translateY(-20px) translateX(10px); opacity: 0.6; }
+  66% { transform: translateY(-10px) translateX(-10px); opacity: 0.4; }
+}
+
+.particle {
+  animation: float-particle var(--duration, 6s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* Waveform animation */
+.waveform-bar {
+  animation: waveform var(--duration, 1s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+@keyframes waveform {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* LiveKit overrides */
+[data-lk-theme] {
+  --lk-bg: var(--voon-bg) !important;
+}
