@@ -11,28 +11,33 @@ export async function POST(req: Request) {
 
   if (!transcript) return NextResponse.json({ error: "transcript required" }, { status: 400 });
 
-  const data = await summarizeMeeting(transcript, title ?? "Meeting", duration ?? 0);
+  try {
+    const data = await summarizeMeeting(transcript, title ?? "Meeting", duration ?? 0);
 
-  if (meetingId) {
-    await prisma.meetingSummary.upsert({
-      where: { meetingId },
-      create: {
-        meetingId,
-        summary: data.summary,
-        keyPoints: data.keyPoints ?? [],
-        actionItems: data.actionItems ?? [],
-        topics: data.topics ?? [],
-        sentiment: data.sentiment ?? null,
-      },
-      update: {
-        summary: data.summary,
-        keyPoints: data.keyPoints ?? [],
-        actionItems: data.actionItems ?? [],
-        topics: data.topics ?? [],
-        sentiment: data.sentiment ?? null,
-      },
-    });
+    if (meetingId) {
+      await prisma.meetingSummary.upsert({
+        where: { meetingId },
+        create: {
+          meetingId,
+          summary: data.summary ?? "",
+          keyPoints: data.keyPoints ?? [],
+          actionItems: data.actionItems ?? [],
+          topics: data.topics ?? [],
+          sentiment: data.sentiment ?? null,
+        },
+        update: {
+          summary: data.summary ?? "",
+          keyPoints: data.keyPoints ?? [],
+          actionItems: data.actionItems ?? [],
+          topics: data.topics ?? [],
+          sentiment: data.sentiment ?? null,
+        },
+      });
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error("AI summarize error:", err);
+    return NextResponse.json({ error: "AI service error" }, { status: 500 });
   }
-
-  return NextResponse.json(data);
 }

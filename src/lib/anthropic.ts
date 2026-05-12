@@ -4,7 +4,7 @@ export const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY!,
 });
 
-export const AI_MODEL = "claude-sonnet-4-5";
+export const AI_MODEL = "claude-sonnet-4-6";
 
 export async function summarizeMeeting(
   transcript: string,
@@ -32,7 +32,8 @@ Analyze the meeting transcript and respond ONLY with valid JSON:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(text);
+  const json = text.match(/\{[\s\S]*\}/)?.[0] ?? text;
+  return JSON.parse(json);
 }
 
 export async function generateQuiz(
@@ -64,7 +65,8 @@ Respond ONLY with valid JSON:
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(text);
+  const json = text.match(/\{[\s\S]*\}/)?.[0] ?? text;
+  return JSON.parse(json);
 }
 
 export async function extractActionItems(transcript: string) {
@@ -91,7 +93,8 @@ export async function extractActionItems(transcript: string) {
   });
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
-  return JSON.parse(text);
+  const json = text.match(/\{[\s\S]*\}/)?.[0] ?? text;
+  return JSON.parse(json);
 }
 
 export async function cleanupCaption(rawText: string, language: string) {

@@ -13,8 +13,14 @@ export async function POST(req: Request) {
 
   if (!file) return NextResponse.json({ error: "file required" }, { status: 400 });
 
-  const ext = file.name.split(".").pop();
-  const path = `${userId}/${nanoid()}.${ext}`;
+  const allowedBuckets = ["recordings", "avatars", "attachments"];
+  if (!allowedBuckets.includes(bucket)) {
+    return NextResponse.json({ error: "Invalid bucket" }, { status: 400 });
+  }
+
+  const rawExt = file.name.split(".").pop() ?? "bin";
+  const safeExt = rawExt.replace(/[^a-zA-Z0-9]/g, "").slice(0, 10);
+  const path = `${userId}/${nanoid()}.${safeExt}`;
 
   const { data, error } = await supabaseAdmin.storage
     .from(bucket)

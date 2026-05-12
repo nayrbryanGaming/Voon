@@ -25,12 +25,27 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   const { id } = await params;
+
+  const existing = await prisma.meeting.findUnique({ where: { id } });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (existing.hostId !== user?.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   const body = await req.json();
+  const { title, description, startTime, maxParticipants, isPublic, isRecorded, status } = body;
 
   const meeting = await prisma.meeting.update({
     where: { id },
-    data: body,
+    data: {
+      ...(title !== undefined && { title }),
+      ...(description !== undefined && { description }),
+      ...(startTime !== undefined && { startTime: new Date(startTime) }),
+      ...(maxParticipants !== undefined && { maxParticipants }),
+      ...(isPublic !== undefined && { isPublic }),
+      ...(isRecorded !== undefined && { isRecorded }),
+      ...(status !== undefined && { status }),
+    },
   });
 
   return NextResponse.json(meeting);
