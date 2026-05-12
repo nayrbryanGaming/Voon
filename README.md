@@ -75,13 +75,13 @@ Zoom membatasi 40 menit. Google Meet butuh akun Google Workspace. Teams butuh li
 | Database | Supabase PostgreSQL (free tier) |
 | ORM | Prisma 5 |
 | Video/Audio | LiveKit Cloud (free tier, WebRTC SFU) |
-| AI | Anthropic Claude claude-sonnet-4-5 |
+| AI | Anthropic Claude claude-sonnet-4-6 |
 | Whiteboard | tldraw v2 |
 | Animations | Framer Motion 11 |
 | State | Zustand 4 |
 | Forms | React Hook Form 7 + Zod 3 |
 | Deploy | Vercel (free hobby tier) |
-| CI/CD | GitHub Actions + amondnet/vercel-action |
+| CI/CD | GitHub Actions (CI) + Vercel GitHub Integration (deploy) |
 
 ---
 
@@ -164,23 +164,17 @@ NEXT_PUBLIC_APP_URL=https://voon.vercel.app
 
 1. Import repo di [vercel.com/new](https://vercel.com/new)
 2. Set semua environment variables di Vercel Dashboard > Settings > Environment Variables
-3. Deploy otomatis setiap push ke `master`
+3. Deploy otomatis setiap push ke `main`
 
-### Cara 2: GitHub Actions (CI/CD Otomatis)
+### Cara 2: GitHub Actions (Sudah Terkonfigurasi)
 
-Workflow sudah ada di `.github/workflows/deploy.yml`. Set secrets di GitHub:
+Workflow CI ada di `.github/workflows/deploy.yml` — menjalankan type check dan build di setiap push.
+**Deployment ditangani otomatis oleh Vercel GitHub Integration** (tidak perlu token Vercel manual).
 
 ```
-Repository > Settings > Secrets > Actions:
-  VERCEL_TOKEN        # vercel.com/account/tokens
-  VERCEL_ORG_ID       # dari .vercel/project.json
-  VERCEL_PROJECT_ID   # dari .vercel/project.json
-```
-
-Untuk mendapatkan `VERCEL_ORG_ID` dan `VERCEL_PROJECT_ID`:
-```bash
-npx vercel link
-cat .vercel/project.json
+Repository > Settings > Secrets:
+  VERCEL_ORG_ID       # opsional, untuk monitoring
+  VERCEL_PROJECT_ID   # opsional, untuk monitoring
 ```
 
 ---
@@ -254,7 +248,8 @@ src/
 │   │   └── settings/       # User settings
 │   ├── (auth)/             # Sign in / Sign up
 │   ├── api/                # API routes
-│   └── join/[code]/        # Join by invite code
+│   ├── join/               # Join by code — form entry
+│   └── join/[code]/        # Join by invite code — redirect
 ├── components/
 │   ├── meeting/            # VideoGrid, ControlBar, ChatPanel, etc.
 │   ├── ai/                 # AISummaryCard, AIQuizModal, etc.
@@ -272,12 +267,39 @@ src/
 
 ## Keamanan
 
-- Auth: Semua `/app/*` routes dilindungi Clerk middleware
-- API: Setiap endpoint memverifikasi `userId` dari Clerk session
-- Webhooks: LiveKit webhook diverifikasi dengan API secret; Clerk dengan SVIX signature
-- Database: Row-level queries per `userId` — tidak ada kebocoran data antar user
-- Permissions: Camera & microphone hanya diminta di halaman `/room/*`
-- Headers: `Permissions-Policy` hanya aktif pada `/room/*`
+- **Auth**: Semua `/app/*` routes dilindungi Clerk middleware (`clerkMiddleware` + `createRouteMatcher`)
+- **API Authorization**: Setiap endpoint memverifikasi `userId` dari Clerk session token
+- **Ownership Check**: PATCH/DELETE meeting hanya bisa dilakukan oleh host (`hostId === user.id`)
+- **Field Whitelist**: PATCH meeting hanya mengizinkan field yang diizinkan (tidak ada privilege escalation)
+- **Attendance Privacy**: Data kehadiran meeting hanya bisa diakses host meeting tersebut
+- **Upload Sanitization**: Bucket name diwhitelist, ekstensi file disanitasi
+- **Webhooks**: LiveKit webhook diverifikasi `WebhookReceiver`; Clerk dengan SVIX HMAC signature
+- **Browser Permissions**: `Permissions-Policy: camera=*, microphone=*` hanya pada `/room/*`
+- **COOP/COEP Headers**: `Cross-Origin-Opener-Policy` + `Cross-Origin-Embedder-Policy` pada `/room/*` untuk SharedArrayBuffer
+- **AI Robustness**: JSON.parse dengan regex extraction fallback, try/catch di semua AI endpoints
+
+---
+
+## Setup Supabase Storage (Cloud Recording)
+
+1. Supabase Dashboard > Storage > New Bucket
+2. Buat bucket: `recordings` (public atau private sesuai kebutuhan)
+3. Buat bucket: `avatars` (public)
+4. Set `SUPABASE_SERVICE_ROLE_KEY` di Vercel untuk write access
+
+LiveKit EgressClient akan menyimpan recording langsung ke S3-compatible storage Supabase.
+
+---
+
+## Troubleshooting
+
+| Error | Solusi |
+|-------|--------|
+| `PrismaClientInitializationError` | `npx prisma generate` + pastikan `DATABASE_URL` benar |
+| `LiveKit token invalid` | Cek `LIVEKIT_API_KEY` dan `LIVEKIT_API_SECRET` |
+| Kamera tidak muncul di lobby | Izinkan akses kamera/mikrofon di browser |
+| AI Summary tidak muncul | Cek `ANTHROPIC_API_KEY` dan LiveKit webhook sudah terdaftar |
+| Recording gagal | Pastikan bucket `recordings` sudah dibuat di Supabase |
 
 ---
 
