@@ -1,185 +1,313 @@
-# 🎙️ Voon — Meet at the Speed of Voice
+# Voon — Meet at the Speed of Voice
 
-> Platform video conference gratis, unlimited, khusus kampus Indonesia. Didukung AI untuk transkripsi, ringkasan, dan interaksi yang lebih cerdas.
+> **Platform video conference gratis, unlimited, berbasis AI — khusus civitas akademika Indonesia.**
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/nayrbryanGaming/Voon)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Next.js](https://img.shields.io/badge/Next.js-15-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+[![Deploy Status](https://img.shields.io/badge/deploy-vercel-black?logo=vercel)](https://voon.vercel.app)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**Live Demo:** [https://voon-nayrbryangamings-projects.vercel.app](https://voon-nayrbryangamings-projects.vercel.app)
-
----
-
-## 📖 Daftar Isi
-- [✨ Fitur Utama](#-fitur-utama)
-- [🤖 Fitur AI (Didukung Claude 3.5 Sonnet)](#-fitur-ai-didukung-claude-35-sonnet)
-- [🧬 Teknologi (Tech Stack)](#-teknologi-tech-stack)
-- [🚀 Panduan Mulai Cepat (Quick Start)](#-panduan-mulai-cepat-quick-start)
-- [⚙️ Konfigurasi Environment](#️-konfigurasi-environment)
-- [🌐 Webhooks & Integrasi](#-webhooks--integrasi)
-- [📁 Struktur Proyek](#-struktur-proyek)
-- [📈 Roadmap & Kontribusi](#-roadmap--kontribusi)
-- [📄 Lisensi](#-lisensi)
+**Live Demo:** [https://voon.vercel.app](https://voon.vercel.app)
+**Repository:** [https://github.com/nayrbryanGaming/Voon](https://github.com/nayrbryanGaming/Voon)
 
 ---
 
-## ✨ Fitur Utama
+## Mengapa Voon?
 
-| Fitur | Status | Deskripsi |
-|-------|--------|-----------|
-| **Video HD Tanpa Batas** | ✅ | Lakukan panggilan video kualitas HD tanpa batasan waktu seperti platform berbayar. |
-| **Kapasitas Besar** | ✅ | Mendukung 100+ peserta dalam satu ruangan secara bersamaan tanpa lag berkat LiveKit. |
-| **Rekaman Cloud** | ✅ | Rekam rapat Anda secara langsung dan simpan dengan aman menggunakan Supabase Storage. |
-| **Absensi Otomatis** | ✅ | Sistem akan mendeteksi partisipan yang hadir, durasi, dan membuat laporan absensi. |
-| **Whiteboard Interaktif**| ✅ | Papan tulis kolaboratif real-time terintegrasi penuh berkat `tldraw`. |
-| **Tanpa Instalasi** | ✅ | 100% berjalan di peramban web modern (Progressive Web App support). |
-| **Harga** | **GRATIS**| Dibangun untuk pendidikan, tanpa biaya berlangganan. |
+Zoom membatasi 40 menit. Google Meet butuh akun Google Workspace. Teams butuh lisensi Microsoft 365. **Voon tidak membutuhkan apapun** — cukup buka browser, masuk dengan email kampus, dan mulai meeting seketika.
 
----
-
-## 🤖 Fitur AI (Didukung Claude 3.5 Sonnet)
-
-Voon membawa rapat online ke level selanjutnya dengan integrasi **Anthropic Claude 3.5 Sonnet** yang kuat:
-
-- **Notulensi Cerdas & Otomatis**: Setelah rapat selesai, AI akan menganalisis transkripsi obrolan dan memberikan rangkuman terstruktur dalam Bahasa Indonesia.
-- **Ekstraksi Action Items**: AI akan membedah siapa yang harus melakukan apa *(Task & PIC)* dari diskusi yang berjalan.
-- **Kuis Generator Otomatis**: Khusus untuk sesi perkuliahan, AI dapat membaca materi yang dipresentasikan (atau diobrolkan) lalu secara otomatis men-generate 5 soal Pilihan Ganda untuk mengetes pemahaman mahasiswa.
-- **Live Captions**: Kombinasi *Web Speech API* lokal dengan *Claude AI* untuk membersihkan, merapihkan teks (cleanup), dan menerjemahkan ucapan secara real-time.
+| Fitur | Zoom (Free) | Google Meet | **Voon** |
+|-------|------------|-------------|----------|
+| Batas waktu | 40 menit | 60 menit | **Unlimited** |
+| Peserta | 100 | 100 | **Unlimited** |
+| AI Meeting Minutes | Tidak | Tidak | **Auto** |
+| AI Absensi Otomatis | Tidak | Tidak | **Auto** |
+| AI Quiz Generator | Tidak | Tidak | **Live** |
+| Live Caption Bahasa Indonesia | Berbayar | Terbatas | **Native** |
+| Whiteboard Kolaboratif | Berbayar | Tidak | **Built-in** |
+| Breakout Rooms | Berbayar | Ya | **Built-in** |
+| Rekam & Replay dengan AI | Berbayar | Tidak | **Built-in** |
+| Polling & Q&A Anonim | Berbayar | Tidak | **Built-in** |
+| Instalasi | Diperlukan | Tidak | **Browser Only** |
 
 ---
 
-## 🧬 Teknologi (Tech Stack)
+## Fitur Utama
 
-Voon dibangun di atas ekosistem modern yang sangat cepat dan *scalable*:
+### Video Conference
+- WebRTC HD via LiveKit Cloud SFU — kualitas enterprise, gratis
+- Gallery & Speaker view — switch otomatis saat screen share
+- Screen sharing dengan anotasi
+- Virtual backgrounds (blur, kantor, kampus, perpustakaan)
+- Noise cancellation toggle
+- Raise hand & emoji reactions real-time
 
-| Komponen | Teknologi yang Digunakan |
-|----------|--------------------------|
-| **Framework** | Next.js 15 (App Router, Turbopack) |
-| **Bahasa** | TypeScript 5 |
-| **Styling** | Tailwind CSS v3.4 + Glassmorphism Custom UI |
-| **Authentication**| Clerk (Seamless login, OAuth, User Management) |
-| **Database** | Supabase (PostgreSQL) |
-| **ORM** | Prisma (Type-safe database client) |
-| **Video/Audio Engine**| LiveKit Cloud (WebRTC, SFU Architecture) |
-| **Kecerdasan Buatan** | Anthropic Claude (claude-sonnet-4-5 / 3.5) |
-| **Whiteboard** | tldraw |
-| **State Management**| Zustand |
-| **Deployment** | Vercel |
+### AI Features (powered by Anthropic Claude)
+- **Auto Meeting Summary** — notulen otomatis setelah setiap rapat
+- **Action Items Extraction** — tugas & deadline diparsing dari percakapan
+- **Live Captions** — Web Speech API + AI correction (Bahasa Indonesia & English)
+- **AI Quiz Generator** — buat 5 soal kuis dari materi yang dibahas, mid-meeting
+- **Smart Attendance** — kehadiran dicatat otomatis via LiveKit webhooks, tanpa roll-call
+
+### Kolaborasi
+- In-room chat real-time via LiveKit DataChannel
+- Collaborative whiteboard — tldraw v2, persistent, multi-user
+- Breakout rooms — bagi peserta ke kelompok kecil otomatis
+- Live polling dengan mode anonim
+- Invite via link atau kode 6-digit
+
+### Manajemen Kampus
+- Attendance dashboard — laporan kehadiran per meeting, export siap cetak
+- Meeting recap — summary, action items, transcript, quiz results
+- Recording & replay — cloud recording ke Supabase Storage
+- Role-based access — Mahasiswa, Dosen, Admin kampus
 
 ---
 
-## 🚀 Panduan Mulai Cepat (Quick Start)
+## Tech Stack
 
-Ikuti panduan berikut untuk menjalankan Voon di mesin lokal Anda.
+| Layer | Teknologi |
+|-------|-----------|
+| Framework | Next.js 15 (App Router, Server Components) |
+| Language | TypeScript 5.7 |
+| Styling | Tailwind CSS 3.4 + CSS Variables |
+| Auth | Clerk (free tier, webhook sync) |
+| Database | Supabase PostgreSQL (free tier) |
+| ORM | Prisma 5 |
+| Video/Audio | LiveKit Cloud (free tier, WebRTC SFU) |
+| AI | Anthropic Claude claude-sonnet-4-5 |
+| Whiteboard | tldraw v2 |
+| Animations | Framer Motion 11 |
+| State | Zustand 4 |
+| Forms | React Hook Form 7 + Zod 3 |
+| Deploy | Vercel (free hobby tier) |
+| CI/CD | GitHub Actions + amondnet/vercel-action |
 
-### 1. Prasyarat
-Pastikan Anda telah menginstal:
-- Node.js (v18+)
-- npm / pnpm / yarn
-- Git
+---
 
-### 2. Kloning Repositori
+## Quick Start
+
+### Prerequisites
+- Node.js 20+
+- Akun [Clerk](https://clerk.com) (free)
+- Akun [Supabase](https://supabase.com) (free)
+- Akun [LiveKit Cloud](https://livekit.io) (free)
+- Akun [Anthropic](https://console.anthropic.com) (API key)
+
+### 1. Clone & Install
+
 ```bash
 git clone https://github.com/nayrbryanGaming/Voon.git
 cd Voon
 npm install
 ```
 
-### 3. Persiapan Layanan Pihak Ketiga (Gratis)
-Anda perlu membuat akun di layanan berikut:
-- **Clerk** (https://clerk.com) - Untuk Autentikasi
-- **LiveKit Cloud** (https://cloud.livekit.io) - Untuk WebRTC Video/Audio
-- **Supabase** (https://supabase.com) - Untuk Database PostgreSQL & Storage
-- **Anthropic Console** (https://console.anthropic.com) - Untuk API Key Claude
-
----
-
-## ⚙️ Konfigurasi Environment
-
-Duplikat berkas `.env.local.example` menjadi `.env.local`, lalu isi dengan kredensial yang Anda dapatkan:
+### 2. Setup Environment
 
 ```bash
 cp .env.local.example .env.local
+# Edit .env.local dengan semua API key Anda
 ```
 
-### Inisialisasi Database
-Jalankan migrasi Prisma untuk membuat skema tabel:
+### 3. Setup Database
+
 ```bash
-npx prisma migrate dev --name init
 npx prisma generate
-```
-*(Opsional) Jika Anda memiliki file seed:*
-```bash
-npm run db:seed
+npx prisma db push
 ```
 
-### Menjalankan Server Lokal
+### 4. Jalankan Development Server
+
 ```bash
 npm run dev
-# Server akan berjalan sangat cepat di http://localhost:3000 berkat Turbopack.
+```
+
+Buka [http://localhost:3000](http://localhost:3000).
+
+---
+
+## Environment Variables
+
+```env
+# CLERK AUTH
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxx
+CLERK_SECRET_KEY=sk_test_xxxx
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+CLERK_WEBHOOK_SECRET=whsec_xxxx
+
+# LIVEKIT
+LIVEKIT_API_KEY=APIxxxx
+LIVEKIT_API_SECRET=xxxx
+NEXT_PUBLIC_LIVEKIT_URL=wss://your-app.livekit.cloud
+
+# SUPABASE
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJxxxx
+SUPABASE_SERVICE_ROLE_KEY=eyJxxxx
+DATABASE_URL=postgresql://postgres:xxxx@db.xxxx.supabase.co:5432/postgres
+
+# ANTHROPIC
+ANTHROPIC_API_KEY=sk-ant-xxxx
+
+# APP
+NEXT_PUBLIC_APP_URL=https://voon.vercel.app
 ```
 
 ---
 
-## 🌐 Webhooks & Integrasi
+## Deploy ke Vercel
 
-Agar fitur seperti *absensi* dan sinkronisasi pengguna berjalan lancar, Anda wajib mengatur Webhooks setelah mendeploy aplikasi ke production (misalnya di Vercel).
+### Cara 1: Vercel Dashboard (Rekomendasi)
 
-1. **Clerk Webhooks**
-   - Buka Clerk Dashboard → Webhooks.
-   - Tambahkan endpoint: `https://voon-nayrbryangamings-projects.vercel.app/api/webhooks/clerk`
-   - Pilih event: `user.created`, `user.updated`, `user.deleted`.
+1. Import repo di [vercel.com/new](https://vercel.com/new)
+2. Set semua environment variables di Vercel Dashboard > Settings > Environment Variables
+3. Deploy otomatis setiap push ke `master`
 
-2. **LiveKit Webhooks**
-   - Buka LiveKit Dashboard → Project Settings → Webhooks.
-   - Tambahkan endpoint: `https://voon-nayrbryangamings-projects.vercel.app/api/webhooks/livekit`
-   - Pilih event: `room_started`, `room_finished`, `participant_joined`, `participant_left`, `egress_started`, `egress_ended`.
+### Cara 2: GitHub Actions (CI/CD Otomatis)
+
+Workflow sudah ada di `.github/workflows/deploy.yml`. Set secrets di GitHub:
+
+```
+Repository > Settings > Secrets > Actions:
+  VERCEL_TOKEN        # vercel.com/account/tokens
+  VERCEL_ORG_ID       # dari .vercel/project.json
+  VERCEL_PROJECT_ID   # dari .vercel/project.json
+```
+
+Untuk mendapatkan `VERCEL_ORG_ID` dan `VERCEL_PROJECT_ID`:
+```bash
+npx vercel link
+cat .vercel/project.json
+```
 
 ---
 
-## 📁 Struktur Proyek
+## Setup Webhooks
 
-```text
+### Clerk Webhook
+1. Clerk Dashboard > Webhooks > Add Endpoint
+2. URL: `https://voon.vercel.app/api/webhooks/clerk`
+3. Events: `user.created`, `user.updated`
+4. Copy signing secret ke `CLERK_WEBHOOK_SECRET`
+
+### LiveKit Webhook
+1. LiveKit Cloud Dashboard > Settings > Webhooks
+2. URL: `https://voon.vercel.app/api/webhooks/livekit`
+3. Events: `room_started`, `room_finished`, `participant_joined`, `participant_left`, `egress_ended`
+
+---
+
+## Database Schema
+
+```
+User --- Campus
+  |
+  +--- Meeting (as Host)
+  |      +--- Participant[]
+  |      +--- Attendance[]
+  |      +--- Transcript
+  |      +--- MeetingSummary
+  |      +--- Poll[]
+  |
+  +--- Attendance[]
+```
+
+---
+
+## API Routes
+
+| Method | Endpoint | Deskripsi |
+|--------|----------|-----------|
+| POST | `/api/livekit` | Generate LiveKit access token |
+| GET/POST | `/api/meetings` | List / buat meeting |
+| GET/PATCH | `/api/meetings/[id]` | Detail / update meeting |
+| POST | `/api/ai/summarize` | Summarize transcript |
+| POST | `/api/ai/quiz` | Generate quiz dari transcript |
+| POST | `/api/ai/action-items` | Extract action items |
+| GET/POST | `/api/ai/transcribe` | Simpan / ambil transcript |
+| GET/POST | `/api/attendance` | Data kehadiran |
+| GET/POST | `/api/polls` | Polling meeting |
+| POST | `/api/polls/[id]/vote` | Vote polling |
+| POST | `/api/recordings/start` | Mulai cloud recording |
+| POST | `/api/recordings/stop` | Stop cloud recording |
+| POST | `/api/upload` | Upload file ke Supabase Storage |
+| POST | `/api/webhooks/clerk` | Sync user dari Clerk |
+| POST | `/api/webhooks/livekit` | Handle room events |
+
+---
+
+## Project Structure
+
+```
 src/
-├── app/                      # Next.js App Router
-│   ├── (app)/                # Layout utama aplikasi (Dashboard, Meetings, Whiteboard)
-│   ├── (auth)/               # Halaman Sign In & Sign Up (Clerk)
-│   ├── api/                  # Backend API Routes (LiveKit tokens, Webhooks, AI, Database CRUD)
-│   ├── layout.tsx            # Root layout
-│   └── page.tsx              # Landing Page utama
-├── components/               # React Components
-│   ├── ai/                   # Komponen khusus UI AI (Quiz, Summaries)
-│   ├── landing/              # Komponen Landing Page (Hero, Features, Pricing)
-│   ├── layout/               # Navigasi, Sidebar, Footer
-│   ├── meeting/              # Video Grid, Chat, Control Bar
-│   └── whiteboard/           # Integrasi Tldraw
-├── hooks/                    # Custom React Hooks
-├── lib/                      # Helper & Utility functions (Prisma client, LiveKit server, Anthropic client)
-├── store/                    # Global state management dengan Zustand
-└── types/                    # TypeScript Type Definitions (.ts)
+├── app/
+│   ├── (app)/              # Protected app shell
+│   │   ├── dashboard/      # Home dashboard
+│   │   ├── meetings/       # Meeting management
+│   │   ├── room/[roomId]/  # Live meeting room (core)
+│   │   ├── recordings/     # Cloud recordings
+│   │   ├── attendance/     # Attendance reports
+│   │   ├── whiteboard/     # Collaborative whiteboard
+│   │   └── settings/       # User settings
+│   ├── (auth)/             # Sign in / Sign up
+│   ├── api/                # API routes
+│   └── join/[code]/        # Join by invite code
+├── components/
+│   ├── meeting/            # VideoGrid, ControlBar, ChatPanel, etc.
+│   ├── ai/                 # AISummaryCard, AIQuizModal, etc.
+│   ├── attendance/         # AttendanceTable, AttendanceBadge
+│   ├── landing/            # Hero, Features, Pricing, CTA
+│   ├── layout/             # Sidebar, Topbar, MobileNav
+│   └── ui/                 # Base UI components
+├── hooks/                  # useChat, useRecording, useCaptions, etc.
+├── lib/                    # livekit, anthropic, prisma, supabase, utils
+├── store/                  # Zustand global state
+└── types/                  # TypeScript type definitions
 ```
 
 ---
 
-## 📈 Deployment & CI/CD
+## Keamanan
 
-Voon dioptimalkan untuk berjalan di **Vercel**. 
+- Auth: Semua `/app/*` routes dilindungi Clerk middleware
+- API: Setiap endpoint memverifikasi `userId` dari Clerk session
+- Webhooks: LiveKit webhook diverifikasi dengan API secret; Clerk dengan SVIX signature
+- Database: Row-level queries per `userId` — tidak ada kebocoran data antar user
+- Permissions: Camera & microphone hanya diminta di halaman `/room/*`
+- Headers: `Permissions-Policy` hanya aktif pada `/room/*`
+
+---
+
+## Scripts
 
 ```bash
-# Instal Vercel CLI (jika belum)
-npm i -g vercel
-
-# Deploy ke production
-vercel --prod
+npm run dev          # Start dev server (Turbopack)
+npm run build        # Production build
+npm run start        # Start production server
+npm run db:migrate   # Run Prisma migrations
+npm run db:generate  # Regenerate Prisma client
+npm run db:studio    # Open Prisma Studio (DB GUI)
 ```
 
 ---
 
-## 📄 Lisensi
+## Contributing
 
-Dibuat dengan ❤️ untuk pendidikan Indonesia.
-Voon dilisensikan di bawah [MIT License](LICENSE). Anda bebas memodifikasi dan menggunakannya secara gratis.
+1. Fork repo
+2. Buat branch: `git checkout -b feat/nama-fitur`
+3. Commit: `git commit -m "feat: tambah fitur X"`
+4. Push & buka Pull Request
 
-*Voon — 2026. Meet at the Speed of Voice.*
+---
 
+## License
+
+MIT License — 2025 Voon
+
+---
+
+**Voon** — Free. Unlimited. Built for campus Indonesia.
+[voon.vercel.app](https://voon.vercel.app)

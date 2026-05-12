@@ -43,7 +43,6 @@
     "tailwindcss": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
     "tldraw": "^2.0.0",
-    "typescript": "^5.0.0",
     "zod": "^3.0.0",
     "zustand": "^4.0.0"
   },
@@ -55,7 +54,8 @@
     "eslint": "^8.0.0",
     "eslint-config-next": "^15.0.0",
     "postcss": "^8.0.0",
-    "prisma": "^5.0.0"
+    "prisma": "^5.0.0",
+    "typescript": "^5.7.3"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
