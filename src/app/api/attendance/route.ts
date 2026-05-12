@@ -12,9 +12,15 @@ export async function GET(req: Request) {
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) return NextResponse.json([], { status: 200 });
 
-  const where = meetingId
-    ? { meetingId }
-    : { userId: user.id };
+  let where: { meetingId?: string; userId?: string };
+  if (meetingId) {
+    const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
+    if (!meeting) return NextResponse.json([], { status: 200 });
+    if (meeting.hostId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    where = { meetingId };
+  } else {
+    where = { userId: user.id };
+  }
 
   const records = await prisma.attendance.findMany({
     where,

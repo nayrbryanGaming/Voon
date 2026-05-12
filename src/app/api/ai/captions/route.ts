@@ -9,6 +9,11 @@ export async function POST(req: Request) {
   const { rawText, language } = await req.json();
   if (!rawText) return NextResponse.json({ error: "rawText required" }, { status: 400 });
 
-  const cleaned = await cleanupCaption(rawText, language ?? "id-ID");
-  return NextResponse.json({ text: cleaned });
+  try {
+    const cleaned = await cleanupCaption(rawText, language ?? "id-ID");
+    return NextResponse.json({ text: cleaned });
+  } catch (err) {
+    console.error("AI captions error:", err);
+    return NextResponse.json({ text: rawText }); // fallback to raw
+  }
 }
