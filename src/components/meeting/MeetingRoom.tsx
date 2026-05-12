@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
+  useRoomContext,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { VideoGrid } from "./VideoGrid";

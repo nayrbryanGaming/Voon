@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { Topbar } from "@/components/layout/Topbar";
 import { PenTool, Plus } from "lucide-react";
-import { nanoid } from "nanoid";
+import { randomBytes } from "crypto";
+
+function generateId(): string {
+  return randomBytes(5).toString("hex");
+}
 
 export default function WhiteboardListPage() {
-  const newId = nanoid(8);
+  const newId = generateId();
   return (
     <div className="min-h-screen">
       <Topbar title="Papan Tulis" />
@@ -21,7 +25,7 @@ export default function WhiteboardListPage() {
         </div>
         <div className="text-center py-20 text-gray-500">
           <PenTool className="w-12 h-12 mx-auto mb-3 opacity-40" />
-          <p>Klik "Baru" untuk membuat papan tulis kolaboratif</p>
+          <p>Klik &ldquo;Baru&rdquo; untuk membuat papan tulis kolaboratif</p>
         </div>
       </div>
     </div>

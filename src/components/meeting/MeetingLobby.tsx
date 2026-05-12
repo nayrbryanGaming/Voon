@@ -34,20 +34,27 @@ export function MeetingLobby({ meeting }: MeetingLobbyProps) {
   const inviteUrl = getMeetingInviteUrl(meeting.inviteCode);
 
   useEffect(() => {
+    let localStream: MediaStream | null = null;
     if (camOn) {
       navigator.mediaDevices
         .getUserMedia({ video: true, audio: false })
         .then((s) => {
+          localStream = s;
           setStream(s);
           if (videoRef.current) videoRef.current.srcObject = s;
         })
         .catch(() => setCamOn(false));
     } else {
-      stream?.getTracks().forEach((t) => t.stop());
-      setStream(null);
+      setStream((prev) => {
+        prev?.getTracks().forEach((t) => t.stop());
+        return null;
+      });
       if (videoRef.current) videoRef.current.srcObject = null;
     }
-    return () => stream?.getTracks().forEach((t) => t.stop());
+    return () => {
+      localStream?.getTracks().forEach((t) => t.stop());
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camOn]);
 
   const handleCopy = async () => {
@@ -59,7 +66,7 @@ export function MeetingLobby({ meeting }: MeetingLobbyProps) {
 
   const handleJoin = () => {
     stream?.getTracks().forEach((t) => t.stop());
-    router.push(`/room/${meeting.roomId}?cam=${camOn}&mic=${micOn}`);
+    router.push(`/room/${meeting.roomId}`);
   };
 
   return (
