@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { summarizeMeeting } from "@/lib/anthropic";
+
+export const maxDuration = 60;
 import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {

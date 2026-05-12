@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { EgressClient } from "livekit-server-sdk";
 import { prisma } from "@/lib/prisma";
 
+export const maxDuration = 30;
+
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {

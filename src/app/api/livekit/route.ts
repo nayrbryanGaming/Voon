@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { generateToken } from "@/lib/livekit";
 import { prisma } from "@/lib/prisma";
 
+export const maxDuration = 10;
+
 export async function POST(req: Request) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
