@@ -72,11 +72,22 @@ const config: Config = {
           "0%, 100%": { transform: "scaleY(1)" },
           "50%": { transform: "scaleY(2)" },
         },
+        "fade-in-up": {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "pop": {
+          "0%": { transform: "scale(0.95)" },
+          "40%": { transform: "scale(1.02)" },
+          "100%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "pulse-ring": "pulse-ring 2s ease-in-out infinite",
         "slide-in-right": "slide-in-right 0.3s ease-out",
         waveform: "waveform 1s ease-in-out infinite",
+        "fade-in-up": "fade-in-up 0.5s ease-out forwards",
+        "pop": "pop 0.3s ease-out forwards",
       },
       backgroundImage: {
         "hero-gradient": "linear-gradient(135deg, #0A0F1E 0%, #0F172A 40%, #0D1B4B 100%)",
