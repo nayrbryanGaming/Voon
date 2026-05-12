@@ -1,7 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Brain, CheckSquare, Users, FileText, Video, Clock, Download } from "lucide-react";
+import { Brain, Users, FileText, Video, Clock, Download, Sparkles } from "lucide-react";
+import { useState } from "react";
 import { formatDateTime, formatDuration } from "@/lib/utils";
 import { AISummaryCard } from "@/components/ai/AISummaryCard";
 import { AIActionItems } from "@/components/ai/AIActionItems";
@@ -36,6 +37,42 @@ interface RecapContentProps {
 }
 
 export function RecapContent({ meeting }: RecapContentProps) {
+  const [generatingSummary, setGeneratingSummary] = useState(false);
+  const [summaryGenerated, setSummaryGenerated] = useState(false);
+  const [generatedSummary, setGeneratedSummary] = useState(meeting.summary);
+
+  async function handleGenerateSummary() {
+    if (!meeting.transcript) return;
+    setGeneratingSummary(true);
+    try {
+      const res = await fetch(`/api/ai/summarize`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ meetingId: meeting.id, transcript: meeting.transcript.content }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setGeneratedSummary(data);
+        setSummaryGenerated(true);
+      }
+    } catch {
+      // silently fail — user can retry
+    } finally {
+      setGeneratingSummary(false);
+    }
+  }
+
+  function handleDownloadTranscript() {
+    if (!meeting.transcript) return;
+    const blob = new Blob([meeting.transcript.content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${meeting.title.replace(/[^a-z0-9]/gi, "_")}_transkrip.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
@@ -61,21 +98,31 @@ export function RecapContent({ meeting }: RecapContentProps) {
 
       <div className="space-y-6">
         {/* AI Summary */}
-        {meeting.summary ? (
+        {(generatedSummary ?? meeting.summary) ? (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <AISummaryCard summary={meeting.summary} />
+            <AISummaryCard summary={(generatedSummary ?? meeting.summary)!} />
           </motion.div>
         ) : (
           <div className="p-6 rounded-2xl bg-[var(--voon-bg-card)] border border-white/5 text-center">
             <Brain className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-            <p className="text-gray-500 text-sm">Notulen AI sedang diproses atau belum tersedia</p>
+            <p className="text-gray-500 text-sm mb-4">Notulen AI belum tersedia</p>
+            {meeting.transcript && (
+              <button
+                onClick={handleGenerateSummary}
+                disabled={generatingSummary || summaryGenerated}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+              >
+                <Sparkles className="w-4 h-4" />
+                {generatingSummary ? "Memproses..." : "Generate Notulen AI"}
+              </button>
+            )}
           </div>
         )}
 
         {/* Action items */}
-        {meeting.summary?.actionItems && meeting.summary.actionItems.length > 0 && (
+        {(generatedSummary ?? meeting.summary)?.actionItems && (generatedSummary ?? meeting.summary)!.actionItems.length > 0 && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <AIActionItems items={meeting.summary.actionItems} />
+            <AIActionItems items={(generatedSummary ?? meeting.summary)!.actionItems} />
           </motion.div>
         )}
 
@@ -100,9 +147,12 @@ export function RecapContent({ meeting }: RecapContentProps) {
                   <FileText className="w-5 h-5 text-blue-400" />
                   <h2 className="text-white font-semibold">Transkrip Lengkap</h2>
                 </div>
-                <button className="text-xs text-blue-400 flex items-center gap-1 hover:text-blue-300">
+                <button
+                  onClick={handleDownloadTranscript}
+                  className="text-xs text-blue-400 flex items-center gap-1 hover:text-blue-300"
+                >
                   <Download className="w-3.5 h-3.5" />
-                  Download PDF
+                  Download TXT
                 </button>
               </div>
               <div className="max-h-64 overflow-y-auto text-gray-400 text-sm leading-relaxed whitespace-pre-wrap">

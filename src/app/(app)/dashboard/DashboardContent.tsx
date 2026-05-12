@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Plus, Link2, Calendar, Video, Clock, Users, Brain, TrendingUp } from "lucide-react";
+import { Plus, Link2, Calendar, Video, Clock, Users, Brain } from "lucide-react";
 import { formatDateTime, formatDuration } from "@/lib/utils";
 import { getMeetingCountdown } from "@/lib/meeting-utils";
 
