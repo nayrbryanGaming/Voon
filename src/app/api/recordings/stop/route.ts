@@ -9,17 +9,31 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
   const { roomName, meetingId, egressId } = await req.json();
-  if (!roomName) {
+  if (!roomName || typeof roomName !== "string") {
     return NextResponse.json({ error: "roomName required" }, { status: 400 });
   }
 
+  // Only host may stop recording
+  if (meetingId) {
+    const meeting = await prisma.meeting.findUnique({ where: { id: meetingId } });
+    if (meeting && meeting.hostId !== user.id) {
+      return NextResponse.json({ error: "Forbidden — only host can stop recording" }, { status: 403 });
+    }
+  }
+
+  const livekitUrl = process.env.LIVEKIT_URL;
+  const livekitKey = process.env.LIVEKIT_API_KEY;
+  const livekitSecret = process.env.LIVEKIT_API_SECRET;
+  if (!livekitUrl || !livekitKey || !livekitSecret) {
+    return NextResponse.json({ error: "Recording not configured" }, { status: 503 });
+  }
+
   try {
-    const egressClient = new EgressClient(
-      process.env.LIVEKIT_URL ?? "",
-      process.env.LIVEKIT_API_KEY ?? "",
-      process.env.LIVEKIT_API_SECRET ?? ""
-    );
+    const egressClient = new EgressClient(livekitUrl, livekitKey, livekitSecret);
 
     if (egressId) {
       await egressClient.stopEgress(egressId);
