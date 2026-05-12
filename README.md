@@ -7,7 +7,7 @@
 ![Next.js](https://img.shields.io/badge/Next.js-15-black)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 
-**Live Demo:** [https://voon-app.vercel.app](https://voon-app.vercel.app)
+**Live Demo:** [https://voon-nayrbryangamings-projects.vercel.app](https://voon-nayrbryangamings-projects.vercel.app)
 
 ---
 
@@ -128,12 +128,12 @@ Agar fitur seperti *absensi* dan sinkronisasi pengguna berjalan lancar, Anda waj
 
 1. **Clerk Webhooks**
    - Buka Clerk Dashboard → Webhooks.
-   - Tambahkan endpoint: `https://voon-app.vercel.app/api/webhooks/clerk`
+   - Tambahkan endpoint: `https://voon-nayrbryangamings-projects.vercel.app/api/webhooks/clerk`
    - Pilih event: `user.created`, `user.updated`, `user.deleted`.
 
 2. **LiveKit Webhooks**
    - Buka LiveKit Dashboard → Project Settings → Webhooks.
-   - Tambahkan endpoint: `https://voon-app.vercel.app/api/webhooks/livekit`
+   - Tambahkan endpoint: `https://voon-nayrbryangamings-projects.vercel.app/api/webhooks/livekit`
    - Pilih event: `room_started`, `room_finished`, `participant_joined`, `participant_left`, `egress_started`, `egress_ended`.
 
 ---
