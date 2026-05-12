@@ -15,13 +15,17 @@ model User {
   avatarUrl String?
   role      UserRole @default(STUDENT)
   campusId  String?
-  campus    Campus?  @relation(fields: [campusId], references: [id])
+  campus    Campus?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  hostedMeetings    Meeting[]    @relation("Host")
+  hostedMeetings    Meeting[]     @relation("Host")
   participations    Participant[]
   attendanceRecords Attendance[]
+
+  @@index([clerkId])
+  @@index([email])
+  @@index([campusId])
 }
 
 enum UserRole {
@@ -31,9 +35,9 @@ enum UserRole {
 }
 
 model Campus {
-  id       String   @id @default(cuid())
+  id       String    @id @default(cuid())
   name     String
-  domain   String?  @unique
+  domain   String?   @unique
   logoUrl  String?
   users    User[]
   meetings Meeting[]
@@ -45,9 +49,9 @@ model Meeting {
   description     String?
   roomId          String        @unique @default(cuid())
   hostId          String
-  host            User          @relation("Host", fields: [hostId], references: [id])
+  host            User          @relation("Host", fields: [hostId], references: [id], onDelete: Cascade)
   campusId        String?
-  campus          Campus?       @relation(fields: [campusId], references: [id])
+  campus          Campus?       @relation(fields: [campusId], references: [id], onDelete: SetNull)
   startTime       DateTime
   endTime         DateTime?
   duration        Int?
@@ -65,6 +69,11 @@ model Meeting {
   summary      MeetingSummary?
   polls        Poll[]
   whiteboardId String?
+
+  @@index([hostId])
+  @@index([roomId])
+  @@index([status])
+  @@index([startTime])
 }
 
 enum MeetingStatus {
@@ -77,9 +86,9 @@ enum MeetingStatus {
 model Participant {
   id        String          @id @default(cuid())
   meetingId String
-  meeting   Meeting         @relation(fields: [meetingId], references: [id])
+  meeting   Meeting         @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   userId    String
-  user      User            @relation(fields: [userId], references: [id])
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   joinedAt  DateTime        @default(now())
   leftAt    DateTime?
   role      ParticipantRole @default(ATTENDEE)
@@ -87,6 +96,8 @@ model Participant {
   isVideoOn Boolean         @default(true)
 
   @@unique([meetingId, userId])
+  @@index([meetingId])
+  @@index([userId])
 }
 
 enum ParticipantRole {
@@ -99,15 +110,17 @@ enum ParticipantRole {
 model Attendance {
   id        String           @id @default(cuid())
   meetingId String
-  meeting   Meeting          @relation(fields: [meetingId], references: [id])
+  meeting   Meeting          @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   userId    String
-  user      User             @relation(fields: [userId], references: [id])
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   joinedAt  DateTime
   leftAt    DateTime?
   duration  Int?
   status    AttendanceStatus @default(PRESENT)
 
   @@unique([meetingId, userId])
+  @@index([meetingId])
+  @@index([userId])
 }
 
 enum AttendanceStatus {
@@ -120,32 +133,38 @@ enum AttendanceStatus {
 model Transcript {
   id        String   @id @default(cuid())
   meetingId String   @unique
-  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   content   String
   speakers  Json?
   createdAt DateTime @default(now())
+
+  @@index([meetingId])
 }
 
 model MeetingSummary {
   id          String   @id @default(cuid())
   meetingId   String   @unique
-  meeting     Meeting  @relation(fields: [meetingId], references: [id])
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   summary     String
   keyPoints   String[]
   actionItems String[]
   topics      String[]
   sentiment   String?
   createdAt   DateTime @default(now())
+
+  @@index([meetingId])
 }
 
 model Poll {
   id        String   @id @default(cuid())
   meetingId String
-  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
   question  String
   options   String[]
   votes     Json?
   isAnon    Boolean  @default(false)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  @@index([meetingId])
 }

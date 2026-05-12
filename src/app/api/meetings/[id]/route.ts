@@ -7,6 +7,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
+
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
   const meeting = await prisma.meeting.findUnique({
     where: { id },
     include: {
@@ -18,6 +22,23 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   });
 
   if (!meeting) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  // Only host, participants, or attendees may view meeting details
+  const isHost = meeting.hostId === user.id;
+  if (!isHost && !meeting.isPublic) {
+    const hasAccess = await prisma.attendance.findUnique({
+      where: { meetingId_userId: { meetingId: id, userId: user.id } },
+    });
+    if (!hasAccess) {
+      const isParticipant = await prisma.participant.findUnique({
+        where: { meetingId_userId: { meetingId: id, userId: user.id } },
+      });
+      if (!isParticipant) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+  }
+
   return NextResponse.json(meeting);
 }
 
@@ -26,24 +47,37 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
   const { id } = await params;
 
   const existing = await prisma.meeting.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (existing.hostId !== user?.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (existing.hostId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const body = await req.json();
   const { title, description, startTime, maxParticipants, isPublic, isRecorded, status } = body;
 
+  // Validate status transitions
+  const validStatuses = ["SCHEDULED", "LIVE", "ENDED", "CANCELLED"];
+  if (status !== undefined && !validStatuses.includes(status)) {
+    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
+
+  // Validate maxParticipants range
+  if (maxParticipants !== undefined && (maxParticipants < 2 || maxParticipants > 1000)) {
+    return NextResponse.json({ error: "maxParticipants must be between 2 and 1000" }, { status: 400 });
+  }
+
   const meeting = await prisma.meeting.update({
     where: { id },
     data: {
-      ...(title !== undefined && { title }),
-      ...(description !== undefined && { description }),
+      ...(title !== undefined && { title: String(title).trim().slice(0, 200) }),
+      ...(description !== undefined && { description: description ? String(description).trim().slice(0, 2000) : null }),
       ...(startTime !== undefined && { startTime: new Date(startTime) }),
       ...(maxParticipants !== undefined && { maxParticipants }),
-      ...(isPublic !== undefined && { isPublic }),
-      ...(isRecorded !== undefined && { isRecorded }),
+      ...(isPublic !== undefined && { isPublic: Boolean(isPublic) }),
+      ...(isRecorded !== undefined && { isRecorded: Boolean(isRecorded) }),
       ...(status !== undefined && { status }),
     },
   });
@@ -56,11 +90,13 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
   const { id } = await params;
 
   const meeting = await prisma.meeting.findUnique({ where: { id } });
   if (!meeting) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (meeting.hostId !== user?.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (meeting.hostId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   await prisma.meeting.delete({ where: { id } });
   return NextResponse.json({ success: true });

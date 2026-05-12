@@ -39,7 +39,7 @@ export function getMeetingCountdown(startTime: Date): string {
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-  if (days > 0) return `${days}h ${hours}j lagi`;
+  if (days > 0) return `${days} hari ${hours}j lagi`;
   if (hours > 0) return `${hours}j ${minutes}m lagi`;
   return `${minutes}m lagi`;
 }

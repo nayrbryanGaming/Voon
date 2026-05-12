@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { nanoid } from "nanoid";
 import type { ChatMessage } from "@/types/meeting";
 
 interface MeetingStore {
@@ -33,7 +34,7 @@ export const useMeetingStore = create<MeetingStore>((set) => ({
 
   reactions: [],
   addReaction: (emoji) => {
-    const id = Math.random().toString(36).slice(2);
+    const id = nanoid(8);
     const x = 20 + Math.random() * 60;
     const y = 20 + Math.random() * 60;
     set((s) => ({ reactions: [...s.reactions, { id, emoji, x, y }] }));

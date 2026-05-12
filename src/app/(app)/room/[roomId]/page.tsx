@@ -10,21 +10,25 @@ export default async function RoomPage({ params }: { params: Promise<{ roomId: s
 
   const { roomId } = await params;
 
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  if (!user) redirect("/sign-in");
+
   const meeting = await prisma.meeting.findUnique({
     where: { roomId },
     include: { host: { select: { id: true, name: true } } },
   });
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
-  if (!user) redirect("/sign-in");
+  if (!meeting || meeting.status === "CANCELLED") {
+    redirect("/dashboard");
+  }
 
-  const isHost = meeting?.host?.id === user.id;
+  const isHost = meeting.host?.id === user.id;
 
   return (
     <MeetingRoom
       roomId={roomId}
-      meetingId={meeting?.id ?? ""}
-      meetingTitle={meeting?.title ?? "Meeting"}
+      meetingId={meeting.id}
+      meetingTitle={meeting.title}
       userId={user.id}
       userName={user.name}
       isHost={isHost}
