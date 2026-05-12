@@ -1,15 +1,4 @@
 {
-  "functions": {
-    "src/app/api/ai/**": {
-      "maxDuration": 60
-    },
-    "src/app/api/livekit/**": {
-      "maxDuration": 10
-    },
-    "src/app/api/recordings/**": {
-      "maxDuration": 30
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
