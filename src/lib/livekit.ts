@@ -1,8 +1,19 @@
 import { AccessToken, RoomServiceClient } from "livekit-server-sdk";
 
+/**
+ * Returns the LiveKit HTTP URL for server-side SDK usage.
+ * Falls back to deriving from the public WSS URL if LIVEKIT_URL is not set.
+ */
+export function getLiveKitHttpUrl(): string {
+  const explicit = process.env.LIVEKIT_URL;
+  if (explicit) return explicit;
+  const wss = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? "";
+  return wss.replace(/^wss?:\/\//, "https://");
+}
+
 export function getLiveKitClient() {
   return new RoomServiceClient(
-    process.env.NEXT_PUBLIC_LIVEKIT_URL!.replace("wss://", "https://"),
+    getLiveKitHttpUrl(),
     process.env.LIVEKIT_API_KEY!,
     process.env.LIVEKIT_API_SECRET!
   );

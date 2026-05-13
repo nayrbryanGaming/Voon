@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { EgressClient, EncodedFileOutput, S3Upload } from "livekit-server-sdk";
 import { prisma } from "@/lib/prisma";
+import { getLiveKitHttpUrl } from "@/lib/livekit";
 
 export const maxDuration = 30;
 
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
   if (meeting.hostId !== user.id) return NextResponse.json({ error: "Forbidden — only host can record" }, { status: 403 });
 
   // Validate required env vars
-  const livekitUrl = process.env.LIVEKIT_URL;
+  const livekitUrl = getLiveKitHttpUrl();
   const livekitKey = process.env.LIVEKIT_API_KEY;
   const livekitSecret = process.env.LIVEKIT_API_SECRET;
   if (!livekitUrl || !livekitKey || !livekitSecret) {
