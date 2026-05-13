@@ -10,6 +10,9 @@ export default async function RecapPage({ params }: { params: Promise<{ id: stri
 
   const { id } = await params;
 
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  if (!user) redirect("/sign-in");
+
   const meeting = await prisma.meeting.findUnique({
     where: { id },
     include: {
@@ -23,6 +26,15 @@ export default async function RecapPage({ params }: { params: Promise<{ id: stri
   });
 
   if (!meeting) notFound();
+
+  // Authorize: only host or attendees may view recap
+  const isHost = meeting.hostId === user.id;
+  if (!isHost) {
+    const attendance = await prisma.attendance.findUnique({
+      where: { meetingId_userId: { meetingId: id, userId: user.id } },
+    });
+    if (!attendance) redirect("/dashboard?error=forbidden");
+  }
 
   return (
     <div className="min-h-screen">
