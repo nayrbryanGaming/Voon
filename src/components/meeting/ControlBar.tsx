@@ -7,7 +7,7 @@ import {
 } from "@livekit/components-react";
 import {
   Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, MessageSquare, Users,
-  Brain, Hand, Smile, LogOut, Subtitles, Circle, StopCircle,
+  Brain, Hand, Smile, LogOut, Subtitles, Circle, StopCircle, BarChart2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRecording } from "@/hooks/useRecording";
@@ -16,7 +16,7 @@ interface ControlBarProps {
   isHost: boolean;
   meetingId: string;
   onLeave: () => void;
-  onTogglePanel: (panel: "chat" | "participants" | "quiz" | null) => void;
+  onTogglePanel: (panel: "chat" | "participants" | "polls" | null) => void;
   activePanel: string | null;
   captionsEnabled: boolean;
   onToggleCaptions: () => void;
@@ -68,7 +68,7 @@ export function ControlBar({
     room.localParticipant?.publishData(new TextEncoder().encode(data));
   };
 
-  const panelBtn = (panelName: "chat" | "participants", Icon: React.ElementType, label: string) => (
+  const panelBtn = (panelName: "chat" | "participants" | "polls", Icon: React.ElementType, label: string) => (
     <button
       onClick={() => onTogglePanel(activePanel === panelName ? null : panelName)}
       title={label}
@@ -160,6 +160,7 @@ export function ControlBar({
 
       {panelBtn("chat", MessageSquare, "Chat")}
       {panelBtn("participants", Users, "Peserta")}
+      {panelBtn("polls", BarChart2, "Polling")}
 
       {/* Captions */}
       <button

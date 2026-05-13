@@ -13,6 +13,7 @@ import { ControlBar } from "./ControlBar";
 import { ChatPanel } from "./ChatPanel";
 import { ParticipantsList } from "./ParticipantsList";
 import { LiveCaptionsOverlay } from "./LiveCaptionsOverlay";
+import { PollWidget } from "./PollWidget";
 import { AIQuizModal } from "@/components/ai/AIQuizModal";
 
 interface MeetingRoomProps {
@@ -26,7 +27,7 @@ interface MeetingRoomProps {
 
 function RoomInner({ meetingId, meetingTitle, isHost, userId }: Omit<MeetingRoomProps, "roomId">) {
   const router = useRouter();
-  const [panel, setPanel] = useState<"chat" | "participants" | "quiz" | null>(null);
+  const [panel, setPanel] = useState<"chat" | "participants" | "polls" | null>(null);
   const [captionsEnabled, setCaptionsEnabled] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
 
@@ -61,6 +62,11 @@ function RoomInner({ meetingId, meetingTitle, isHost, userId }: Omit<MeetingRoom
         {panel === "participants" && (
           <div className="w-72 bg-[var(--voon-bg-card)] border-l border-white/5 flex-shrink-0">
             <ParticipantsList isHost={isHost} />
+          </div>
+        )}
+        {panel === "polls" && (
+          <div className="w-72 bg-[var(--voon-bg-card)] border-l border-white/5 flex-shrink-0 overflow-y-auto">
+            <PollWidget meetingId={meetingId} isHost={isHost} />
           </div>
         )}
 
