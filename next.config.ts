@@ -10,7 +10,13 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      allowedOrigins: ["voon.vercel.app", "localhost:3000"],
+      allowedOrigins: [
+        "voon.vercel.app",
+        "localhost:3000",
+        ...(process.env.NEXT_PUBLIC_APP_URL
+          ? [process.env.NEXT_PUBLIC_APP_URL.replace(/^https?:\/\//, "")]
+          : []),
+      ],
     },
   },
 };

@@ -43,16 +43,17 @@ export async function POST(req: Request) {
         },
       });
 
-      // Auto-generate AI summary if transcript exists
+      // Auto-generate AI summary if transcript exists (upsert prevents race-condition duplicates)
       const transcript = await prisma.transcript.findUnique({ where: { meetingId: meeting.id } });
-      if (transcript && !await prisma.meetingSummary.findUnique({ where: { meetingId: meeting.id } })) {
+      if (transcript) {
         try {
           const duration = Math.round((Date.now() - meeting.startTime.getTime()) / 1000);
           const summaryData = await summarizeMeeting(transcript.content, meeting.title, duration);
           const actionData = await extractActionItems(transcript.content);
 
-          await prisma.meetingSummary.create({
-            data: {
+          await prisma.meetingSummary.upsert({
+            where: { meetingId: meeting.id },
+            create: {
               meetingId: meeting.id,
               summary: summaryData.summary,
               keyPoints: summaryData.keyPoints ?? [],
@@ -60,6 +61,7 @@ export async function POST(req: Request) {
               topics: summaryData.topics ?? [],
               sentiment: summaryData.sentiment ?? null,
             },
+            update: {},
           });
         } catch (err) {
           console.error("AI summary failed:", err);

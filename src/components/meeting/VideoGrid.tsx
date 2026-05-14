@@ -64,8 +64,10 @@ export function VideoGrid() {
             "flex-1 grid gap-2",
             cameraAndPlaceholderTracks.length === 1 && "grid-cols-1",
             cameraAndPlaceholderTracks.length === 2 && "grid-cols-2",
-            cameraAndPlaceholderTracks.length <= 4 && cameraAndPlaceholderTracks.length > 2 && "grid-cols-2",
-            cameraAndPlaceholderTracks.length > 4 && "grid-cols-3"
+            cameraAndPlaceholderTracks.length >= 3 && cameraAndPlaceholderTracks.length <= 4 && "grid-cols-2",
+            cameraAndPlaceholderTracks.length >= 5 && cameraAndPlaceholderTracks.length <= 9 && "grid-cols-3",
+            cameraAndPlaceholderTracks.length >= 10 && cameraAndPlaceholderTracks.length <= 16 && "grid-cols-4",
+            cameraAndPlaceholderTracks.length > 16 && "grid-cols-5"
           )}
         >
           {cameraAndPlaceholderTracks.map((track) => (

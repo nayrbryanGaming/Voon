@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
-import { Copy, Video, VideoOff, Mic, MicOff, Users, Calendar, Check } from "lucide-react";
+import { Copy, Video, VideoOff, Mic, MicOff, Users, Calendar, Check, AlertCircle } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
 import { getMeetingInviteUrl } from "@/lib/meeting-utils";
 
@@ -30,12 +29,14 @@ export function MeetingLobby({ meeting }: MeetingLobbyProps) {
   const [micOn, setMicOn] = useState(true);
   const [copied, setCopied] = useState(false);
   const [stream, setStream] = useState<MediaStream | null>(null);
+  const [camError, setCamError] = useState<string | null>(null);
 
   const inviteUrl = getMeetingInviteUrl(meeting.inviteCode);
 
   useEffect(() => {
     let localStream: MediaStream | null = null;
     if (camOn) {
+      setCamError(null);
       navigator.mediaDevices
         .getUserMedia({ video: true, audio: false })
         .then((s) => {
@@ -43,7 +44,17 @@ export function MeetingLobby({ meeting }: MeetingLobbyProps) {
           setStream(s);
           if (videoRef.current) videoRef.current.srcObject = s;
         })
-        .catch(() => setCamOn(false));
+        .catch((err: unknown) => {
+          const name = err instanceof DOMException ? err.name : "";
+          if (name === "NotAllowedError" || name === "PermissionDeniedError") {
+            setCamError("Izin kamera ditolak. Aktifkan kamera di pengaturan browser.");
+          } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+            setCamError("Tidak ada kamera yang terdeteksi.");
+          } else {
+            setCamError("Kamera tidak dapat diakses.");
+          }
+          setCamOn(false);
+        });
     } else {
       setStream((prev) => {
         prev?.getTracks().forEach((t) => t.stop());
@@ -79,21 +90,31 @@ export function MeetingLobby({ meeting }: MeetingLobbyProps) {
             {camOn ? (
               <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center">
                 <VideoOff className="w-12 h-12 text-gray-600" />
+                {camError && (
+                  <div className="flex items-center gap-1.5 text-amber-400 text-xs">
+                    <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                    {camError}
+                  </div>
+                )}
               </div>
             )}
           </div>
           <div className="flex justify-center gap-3 mt-4">
             <button
+              type="button"
               onClick={() => setMicOn(!micOn)}
               className={`p-3 rounded-xl transition-colors ${micOn ? "bg-white/10 text-white" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}
+              title={micOn ? "Matikan Mic" : "Aktifkan Mic"}
             >
               {micOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
             </button>
             <button
+              type="button"
               onClick={() => setCamOn(!camOn)}
               className={`p-3 rounded-xl transition-colors ${camOn ? "bg-white/10 text-white" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}
+              title={camOn ? "Matikan Kamera" : "Aktifkan Kamera"}
             >
               {camOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
             </button>
@@ -119,15 +140,21 @@ export function MeetingLobby({ meeting }: MeetingLobbyProps) {
 
           {/* Invite link */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Link Undangan</label>
+            <label htmlFor="invite-url" className="block text-sm font-medium text-gray-300 mb-2">
+              Link Undangan
+            </label>
             <div className="flex gap-2">
               <input
+                id="invite-url"
                 readOnly
                 value={inviteUrl}
+                aria-label="Link undangan meeting"
                 className="flex-1 px-3 py-2 bg-[var(--voon-bg-elevated)] border border-white/10 rounded-xl text-gray-300 text-sm"
               />
               <button
+                type="button"
                 onClick={handleCopy}
+                aria-label="Salin link undangan"
                 className="p-2 bg-[var(--voon-bg-elevated)] border border-white/10 rounded-xl text-gray-400 hover:text-white transition-colors"
               >
                 {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
@@ -147,6 +174,7 @@ export function MeetingLobby({ meeting }: MeetingLobbyProps) {
           </div>
 
           <button
+            type="button"
             onClick={handleJoin}
             className="w-full py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-lg transition-all hover:shadow-[0_0_30px_rgba(37,99,235,0.4)]"
           >

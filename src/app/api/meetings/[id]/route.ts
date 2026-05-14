@@ -69,12 +69,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "maxParticipants must be between 2 and 1000" }, { status: 400 });
   }
 
+  // Validate title length
+  if (title !== undefined) {
+    const trimmed = String(title).trim();
+    if (trimmed.length < 3) return NextResponse.json({ error: "title must be at least 3 characters" }, { status: 400 });
+    if (trimmed.length > 200) return NextResponse.json({ error: "title must not exceed 200 characters" }, { status: 400 });
+  }
+
+  // Validate startTime is in the future (allow 5 min clock drift)
+  let parsedStartTime: Date | undefined;
+  if (startTime !== undefined) {
+    parsedStartTime = new Date(startTime);
+    if (isNaN(parsedStartTime.getTime())) {
+      return NextResponse.json({ error: "Invalid startTime" }, { status: 400 });
+    }
+    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+    if (parsedStartTime < fiveMinAgo && existing.status === "SCHEDULED") {
+      return NextResponse.json({ error: "startTime must be in the future" }, { status: 400 });
+    }
+  }
+
   const meeting = await prisma.meeting.update({
     where: { id },
     data: {
       ...(title !== undefined && { title: String(title).trim().slice(0, 200) }),
       ...(description !== undefined && { description: description ? String(description).trim().slice(0, 2000) : null }),
-      ...(startTime !== undefined && { startTime: new Date(startTime) }),
+      ...(parsedStartTime !== undefined && { startTime: parsedStartTime }),
       ...(maxParticipants !== undefined && { maxParticipants }),
       ...(isPublic !== undefined && { isPublic: Boolean(isPublic) }),
       ...(isRecorded !== undefined && { isRecorded: Boolean(isRecorded) }),

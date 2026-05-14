@@ -33,7 +33,11 @@ Analyze the meeting transcript and respond ONLY with valid JSON:
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const json = text.match(/\{[\s\S]*\}/)?.[0] ?? text;
-  return JSON.parse(json);
+  try {
+    return JSON.parse(json);
+  } catch {
+    throw new Error(`AI returned invalid JSON for summary: ${text.slice(0, 300)}`);
+  }
 }
 
 export async function generateQuiz(
@@ -66,7 +70,11 @@ Respond ONLY with valid JSON:
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const json = text.match(/\{[\s\S]*\}/)?.[0] ?? text;
-  return JSON.parse(json);
+  try {
+    return JSON.parse(json);
+  } catch {
+    throw new Error(`AI returned invalid JSON for quiz: ${text.slice(0, 300)}`);
+  }
 }
 
 export async function extractActionItems(transcript: string) {
@@ -94,7 +102,11 @@ export async function extractActionItems(transcript: string) {
 
   const text = response.content[0].type === "text" ? response.content[0].text : "";
   const json = text.match(/\{[\s\S]*\}/)?.[0] ?? text;
-  return JSON.parse(json);
+  try {
+    return JSON.parse(json);
+  } catch {
+    throw new Error(`AI returned invalid JSON for action items: ${text.slice(0, 300)}`);
+  }
 }
 
 export async function cleanupCaption(rawText: string, language: string) {

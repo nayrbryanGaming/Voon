@@ -51,9 +51,8 @@ export async function POST(
   }
 
   votes[optionStr] = (votes[optionStr] ?? 0) + 1;
-  if (!poll.isAnon) {
-    votes[voterKey] = 1;
-  }
+  // Always track voter to prevent double-voting; key is stripped from public response
+  votes[voterKey] = 1;
 
   const updated = await prisma.poll.update({
     where: { id: pollId },
