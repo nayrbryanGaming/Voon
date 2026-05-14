@@ -1,4 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -8,11 +10,27 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isPublicRoute(req)) {
-    await auth.protect();
+// Graceful fallback: if Clerk keys aren't configured, allow public routes and block protected routes
+function fallbackMiddleware(req: NextRequest) {
+  if (isPublicRoute(req)) {
+    return NextResponse.next();
   }
-});
+  return NextResponse.redirect(new URL("/sign-in", req.url));
+}
+
+// Check if Clerk is properly configured (non-empty keys)
+const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
+const isClerkConfigured = clerkKey.startsWith("pk_") && clerkKey.length > 20;
+
+const clerkHandler = isClerkConfigured
+  ? clerkMiddleware(async (auth, req) => {
+      if (!isPublicRoute(req)) {
+        await auth.protect();
+      }
+    })
+  : fallbackMiddleware;
+
+export default clerkHandler;
 
 export const config = {
   matcher: [
