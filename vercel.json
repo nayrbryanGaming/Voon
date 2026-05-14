@@ -1,5 +1,6 @@
 {
   "alias": ["voon.vercel.app", "voon-app.vercel.app"],
+  "framework": "nextjs",
   "headers": [
     {
       "source": "/(.*)",
