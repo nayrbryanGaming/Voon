@@ -6,6 +6,13 @@ import { prisma } from "@/lib/prisma";
 export const maxDuration = 10;
 
 export async function POST(req: Request) {
+  if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET || !process.env.NEXT_PUBLIC_LIVEKIT_URL) {
+    return NextResponse.json(
+      { error: "LiveKit belum dikonfigurasi. Set LIVEKIT_API_KEY, LIVEKIT_API_SECRET, dan NEXT_PUBLIC_LIVEKIT_URL." },
+      { status: 503 }
+    );
+  }
+
   const { roomName, isHost, guestName } = await req.json();
   if (!roomName) return NextResponse.json({ error: "roomName required" }, { status: 400 });
 
