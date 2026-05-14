@@ -1,15 +1,15 @@
-import { auth } from "@clerk/nextjs/server";
+import { getServerUserId } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // GET /api/user/campus — returns current user's campus info (if any)
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const userId = await getServerUserId();
     if (!userId) return NextResponse.json(null);
 
     const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { id: userId },
       select: {
         campus: {
           select: { id: true, name: true, domain: true, logoUrl: true },

@@ -1,7 +1,7 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
-import { Bell, Search } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
+import { Bell, Search, LogOut, User } from "lucide-react";
 import { MobileNav } from "./MobileNav";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -10,6 +10,10 @@ interface TopbarProps {
 }
 
 export function Topbar({ title }: TopbarProps) {
+  const { data: session } = useSession();
+  const userName = session?.user?.name ?? session?.user?.email ?? "Akun";
+  const initial = userName[0]?.toUpperCase() ?? "?";
+
   return (
     <header className="h-16 bg-[var(--voon-bg-card)]/80 backdrop-blur-md border-b border-white/5 flex items-center px-4 gap-4 sticky top-0 z-20">
       <MobileNav />
@@ -34,7 +38,24 @@ export function Topbar({ title }: TopbarProps) {
         <button className="relative p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors">
           <Bell className="w-5 h-5" />
         </button>
-        <UserButton afterSignOutUrl="/" />
+        {session ? (
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+              {initial}
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+              title="Keluar"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gray-400">
+            <User className="w-4 h-4" />
+          </div>
+        )}
       </div>
     </header>
   );

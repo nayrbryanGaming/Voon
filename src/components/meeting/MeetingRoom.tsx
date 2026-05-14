@@ -24,6 +24,7 @@ interface MeetingRoomProps {
   userId: string;
   userName: string;
   isHost: boolean;
+  guestName?: string;
 }
 
 function RoomInner({ meetingId, meetingTitle, isHost, userId, userName }: Omit<MeetingRoomProps, "roomId">) {
@@ -98,7 +99,7 @@ function RoomInner({ meetingId, meetingTitle, isHost, userId, userName }: Omit<M
   );
 }
 
-export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName, isHost }: MeetingRoomProps) {
+export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName, isHost, guestName }: MeetingRoomProps) {
   const [token, setToken] = useState("");
   const [serverUrl, setServerUrl] = useState("");
   const [error, setError] = useState("");
@@ -107,7 +108,7 @@ export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName,
     fetch("/api/livekit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ roomName: roomId, isHost }),
+      body: JSON.stringify({ roomName: roomId, isHost, ...(guestName ? { guestName } : {}) }),
     })
       .then((r) => r.json())
       .then((data) => {

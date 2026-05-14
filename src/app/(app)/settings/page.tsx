@@ -1,17 +1,16 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Topbar } from "@/components/layout/Topbar";
-import { UserButton } from "@clerk/nextjs";
 import { GraduationCap, Shield, Info, Mail, User } from "lucide-react";
 
 export default async function SettingsPage() {
-  const { userId } = await auth();
+  const session = await auth();
+  const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
-  const clerkUser = await currentUser();
   const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
+    where: { id: userId },
     include: { campus: true },
   });
 
@@ -34,19 +33,23 @@ export default async function SettingsPage() {
             Profil
           </h2>
           <div className="flex items-center gap-4 mb-4">
-            <UserButton appearance={{ elements: { avatarBox: "w-16 h-16" } }} />
+            <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white text-2xl">
+              {(user?.name ?? session.user?.name ?? "?")[0]?.toUpperCase()}
+            </div>
             <div>
-              <p className="text-white font-medium">{user?.name ?? clerkUser?.fullName}</p>
+              <p className="text-white font-medium">{user?.name ?? session.user?.name}</p>
               <p className="text-gray-400 text-sm flex items-center gap-1.5 mt-0.5">
                 <Mail className="w-3.5 h-3.5" />
-                {user?.email ?? clerkUser?.primaryEmailAddress?.emailAddress}
+                {user?.email ?? session.user?.email}
               </p>
+              {user?.username && (
+                <p className="text-gray-500 text-xs mt-0.5">@{user.username}</p>
+              )}
               <span className="inline-block text-xs text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full mt-1.5">
                 {roleLabel}
               </span>
             </div>
           </div>
-          <p className="text-gray-500 text-sm">Kelola foto profil dan nama melalui tombol avatar di atas.</p>
         </div>
 
         {/* Campus */}
@@ -89,8 +92,8 @@ export default async function SettingsPage() {
           </h2>
           <div className="space-y-2 text-sm text-gray-400">
             <p>Versi: 0.1.0</p>
-            <p>Stack: Next.js 15 · LiveKit · Anthropic Claude AI · Supabase · Clerk</p>
-            <p className="text-emerald-400">Gratis selamanya untuk kampus Indonesia 🎓</p>
+            <p>Stack: Next.js 15 · LiveKit · Anthropic Claude AI · Supabase · NextAuth</p>
+            <p className="text-emerald-400">Gratis selamanya untuk kampus Indonesia</p>
           </div>
         </div>
       </div>

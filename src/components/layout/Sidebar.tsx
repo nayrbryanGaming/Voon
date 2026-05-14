@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton } from "@clerk/nextjs";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
@@ -13,6 +13,7 @@ import {
   Settings,
   Plus,
   GraduationCap,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,7 +35,11 @@ interface CampusInfo {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [campus, setCampus] = useState<CampusInfo | null>(null);
+
+  const userName = session?.user?.name ?? session?.user?.email ?? "Akun";
+  const initial = userName[0]?.toUpperCase() ?? "?";
 
   useEffect(() => {
     fetch("/api/user/campus")
@@ -104,8 +109,19 @@ export function Sidebar() {
       {/* User */}
       <div className="px-4 py-4 border-t border-white/5">
         <div className="flex items-center gap-3">
-          <UserButton afterSignOutUrl="/" />
-          <span className="text-sm text-gray-400">Akun</span>
+          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+            {initial}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-white truncate">{userName}</p>
+          </div>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5 transition-colors flex-shrink-0"
+            title="Keluar"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </aside>

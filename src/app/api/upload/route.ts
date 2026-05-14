@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getServerUserId } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { nanoid } from "nanoid";
@@ -12,7 +12,7 @@ const ALLOWED_TYPES: Record<string, string[]> = {
 };
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
+  const userId = await getServerUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const formData = await req.formData();

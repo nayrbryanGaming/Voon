@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Simple public-path list — no Clerk import to avoid Edge Runtime crash when keys are empty.
-// When real Clerk keys are set in Vercel, re-enable Clerk middleware here.
 const PUBLIC_PREFIXES = [
   "/",
   "/sign-in",
   "/sign-up",
   "/join",
+  "/api/auth",
   "/api/webhooks",
-  "/api/integrations", // Bearer-token auth, not Clerk
+  "/api/integrations", // Bearer-token auth
 ];
 
 function isPublicRoute(pathname: string): boolean {
@@ -18,7 +17,6 @@ function isPublicRoute(pathname: string): boolean {
       pathname === prefix ||
       pathname.startsWith(prefix + "/") ||
       pathname.startsWith(prefix + "?") ||
-      // root is prefix of everything — handle separately
       (prefix === "/" && pathname === "/")
   );
 }
@@ -28,7 +26,17 @@ export default function middleware(req: NextRequest) {
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
-  return NextResponse.redirect(new URL("/sign-in", req.url));
+
+  // Check for NextAuth session token
+  const sessionToken =
+    req.cookies.get("__Secure-authjs.session-token")?.value ??
+    req.cookies.get("authjs.session-token")?.value;
+
+  if (!sessionToken) {
+    return NextResponse.redirect(new URL("/sign-in", req.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {

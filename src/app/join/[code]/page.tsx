@@ -1,11 +1,8 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export default async function JoinPage({ params }: { params: Promise<{ code: string }> }) {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
-
   const { code } = await params;
   const meeting = await prisma.meeting.findUnique({ where: { inviteCode: code } });
 
@@ -13,5 +10,11 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
     redirect("/dashboard?error=invalid-code");
   }
 
-  redirect(`/meetings/${meeting.id}`);
+  // If logged in, go to meeting lobby; if guest, go directly to room
+  const session = await auth();
+  if (session?.user?.id) {
+    redirect(`/meetings/${meeting.id}`);
+  } else {
+    redirect(`/room/${meeting.roomId}`);
+  }
 }

@@ -8,22 +8,25 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  name      String
-  avatarUrl String?
-  role      UserRole @default(STUDENT)
-  campusId  String?
-  campus    Campus?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(cuid())
+  clerkId      String?  @unique
+  username     String?  @unique
+  passwordHash String?
+  email        String   @unique
+  name         String
+  avatarUrl    String?
+  role         UserRole @default(STUDENT)
+  campusId     String?
+  campus       Campus?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   hostedMeetings    Meeting[]     @relation("Host")
   participations    Participant[]
   attendanceRecords Attendance[]
 
   @@index([clerkId])
+  @@index([username])
   @@index([email])
   @@index([campusId])
 }
