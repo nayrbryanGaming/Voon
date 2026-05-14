@@ -7,16 +7,18 @@ import {
 } from "@livekit/components-react";
 import {
   Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, MessageSquare, Users,
-  Brain, Hand, Smile, LogOut, Subtitles, Circle, StopCircle, BarChart2,
+  Brain, Hand, Smile, LogOut, Subtitles, Circle, StopCircle, BarChart2, HelpCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRecording } from "@/hooks/useRecording";
+
+type PanelType = "chat" | "participants" | "polls" | "qa";
 
 interface ControlBarProps {
   isHost: boolean;
   meetingId: string;
   onLeave: () => void;
-  onTogglePanel: (panel: "chat" | "participants" | "polls" | null) => void;
+  onTogglePanel: (panel: PanelType | null) => void;
   activePanel: string | null;
   captionsEnabled: boolean;
   onToggleCaptions: () => void;
@@ -73,7 +75,7 @@ export function ControlBar({
     room.localParticipant?.publishData(new TextEncoder().encode(data));
   };
 
-  const panelBtn = (panelName: "chat" | "participants" | "polls", Icon: React.ElementType, label: string) => (
+  const panelBtn = (panelName: PanelType, Icon: React.ElementType, label: string) => (
     <button
       type="button"
       onClick={() => onTogglePanel(activePanel === panelName ? null : panelName)}
@@ -173,6 +175,7 @@ export function ControlBar({
       {panelBtn("chat", MessageSquare, "Chat")}
       {panelBtn("participants", Users, "Peserta")}
       {panelBtn("polls", BarChart2, "Polling")}
+      {panelBtn("qa", HelpCircle, "Q&A")}
 
       {/* Captions */}
       <button

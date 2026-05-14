@@ -14,6 +14,7 @@ import { ChatPanel } from "./ChatPanel";
 import { ParticipantsList } from "./ParticipantsList";
 import { LiveCaptionsOverlay } from "./LiveCaptionsOverlay";
 import { PollWidget } from "./PollWidget";
+import { QAPanel } from "./QAPanel";
 import { AIQuizModal } from "@/components/ai/AIQuizModal";
 
 interface MeetingRoomProps {
@@ -25,9 +26,9 @@ interface MeetingRoomProps {
   isHost: boolean;
 }
 
-function RoomInner({ meetingId, meetingTitle, isHost, userId }: Omit<MeetingRoomProps, "roomId">) {
+function RoomInner({ meetingId, meetingTitle, isHost, userId, userName }: Omit<MeetingRoomProps, "roomId">) {
   const router = useRouter();
-  const [panel, setPanel] = useState<"chat" | "participants" | "polls" | null>(null);
+  const [panel, setPanel] = useState<"chat" | "participants" | "polls" | "qa" | null>(null);
   const [captionsEnabled, setCaptionsEnabled] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
 
@@ -67,6 +68,11 @@ function RoomInner({ meetingId, meetingTitle, isHost, userId }: Omit<MeetingRoom
         {panel === "polls" && (
           <div className="w-72 bg-[var(--voon-bg-card)] border-l border-white/5 flex-shrink-0 overflow-y-auto">
             <PollWidget meetingId={meetingId} isHost={isHost} />
+          </div>
+        )}
+        {panel === "qa" && (
+          <div className="w-80 bg-[var(--voon-bg-card)] border-l border-white/5 flex-shrink-0 flex flex-col">
+            <QAPanel isHost={isHost} participantName={userName} />
           </div>
         )}
 
@@ -150,7 +156,7 @@ export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName,
         meetingTitle={meetingTitle}
         isHost={isHost}
         userId={userId}
-        userName={userName}
+        userName={userName ?? "Peserta"}
       />
     </LiveKitRoom>
   );
