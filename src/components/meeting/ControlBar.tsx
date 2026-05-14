@@ -48,12 +48,17 @@ export function ControlBar({
   const toggleCam = () => localParticipant?.setCameraEnabled(isCamOff);
 
   const toggleScreenShare = async () => {
-    if (sharing) {
-      await localParticipant?.setScreenShareEnabled(false);
-      setSharing(false);
-    } else {
-      await localParticipant?.setScreenShareEnabled(true);
-      setSharing(true);
+    try {
+      if (sharing) {
+        await localParticipant?.setScreenShareEnabled(false);
+        setSharing(false);
+      } else {
+        await localParticipant?.setScreenShareEnabled(true);
+        setSharing(true);
+      }
+    } catch {
+      // User cancelled or permission denied — revert optimistic state
+      setSharing((prev) => !prev);
     }
   };
 
@@ -70,6 +75,7 @@ export function ControlBar({
 
   const panelBtn = (panelName: "chat" | "participants" | "polls", Icon: React.ElementType, label: string) => (
     <button
+      type="button"
       onClick={() => onTogglePanel(activePanel === panelName ? null : panelName)}
       title={label}
       className={cn(
@@ -89,6 +95,7 @@ export function ControlBar({
         <div className="absolute bottom-20 left-1/2 -translate-x-1/2 flex gap-2 p-3 bg-[var(--voon-bg-elevated)] border border-white/10 rounded-2xl">
           {REACTIONS.map((emoji) => (
             <button
+              type="button"
               key={emoji}
               onClick={() => sendReaction(emoji)}
               className="text-2xl hover:scale-125 transition-transform"
@@ -101,6 +108,7 @@ export function ControlBar({
 
       {/* Mic */}
       <button
+        type="button"
         onClick={toggleMic}
         title={isMuted ? "Aktifkan Mic" : "Matikan Mic"}
         className={cn(
@@ -114,6 +122,7 @@ export function ControlBar({
 
       {/* Camera */}
       <button
+        type="button"
         onClick={toggleCam}
         title={isCamOff ? "Aktifkan Kamera" : "Matikan Kamera"}
         className={cn(
@@ -127,6 +136,7 @@ export function ControlBar({
 
       {/* Screen share */}
       <button
+        type="button"
         onClick={toggleScreenShare}
         title="Berbagi Layar"
         className={cn(
@@ -140,6 +150,7 @@ export function ControlBar({
 
       {/* Reactions */}
       <button
+        type="button"
         onClick={() => setShowReactions(!showReactions)}
         className="flex flex-col items-center gap-1 p-3 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
       >
@@ -149,6 +160,7 @@ export function ControlBar({
 
       {/* Raise hand */}
       <button
+        type="button"
         onClick={raiseHand}
         className="flex flex-col items-center gap-1 p-3 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors"
       >
@@ -164,6 +176,7 @@ export function ControlBar({
 
       {/* Captions */}
       <button
+        type="button"
         onClick={onToggleCaptions}
         className={cn(
           "flex flex-col items-center gap-1 p-3 rounded-xl transition-colors",
@@ -178,6 +191,7 @@ export function ControlBar({
       {isHost && (
         <>
           <button
+            type="button"
             onClick={isRecording ? stopRecording : startRecording}
             disabled={recLoading}
             title={isRecording ? "Hentikan Rekaman" : "Mulai Rekaman"}
@@ -192,6 +206,7 @@ export function ControlBar({
             <span className="text-xs hidden sm:block">{isRecording ? "Stop Rec" : "Rekam"}</span>
           </button>
           <button
+            type="button"
             onClick={onOpenQuiz}
             className="flex flex-col items-center gap-1 p-3 rounded-xl bg-purple-600/20 text-purple-400 hover:bg-purple-600/30 border border-purple-500/20 transition-colors"
           >
@@ -205,6 +220,7 @@ export function ControlBar({
 
       {/* Leave */}
       <button
+        type="button"
         onClick={onLeave}
         className="flex flex-col items-center gap-1 px-5 py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white transition-colors"
       >

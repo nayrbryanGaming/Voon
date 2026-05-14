@@ -24,7 +24,7 @@ export function ChatPanel() {
       const decoded = new TextDecoder().decode(msg.payload);
       const data = JSON.parse(decoded);
       if (typeof data.sender === "string" && typeof data.text === "string") {
-        setMessages((prev) => [...prev, { id: Date.now().toString(), ...data, time: new Date() }]);
+        setMessages((prev) => [...prev, { id: crypto.randomUUID(), ...data, time: new Date() }]);
       }
     } catch {
       // malformed message — ignore silently
@@ -45,7 +45,7 @@ export function ChatPanel() {
       await room.localParticipant?.publishData(new TextEncoder().encode(data), { topic: "chat" });
       setMessages((prev) => [
         ...prev,
-        { id: Date.now().toString(), sender: "Anda", text, time: new Date() },
+        { id: crypto.randomUUID(), sender: "Anda", text, time: new Date() },
       ]);
       setInput("");
       setSendError(null);
