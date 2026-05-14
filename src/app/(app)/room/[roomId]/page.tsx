@@ -23,6 +23,10 @@ export default async function RoomPage({
   });
 
   if (!meeting || meeting.status === "CANCELLED") {
+    // Guests can't access /dashboard (protected) — redirect them to /join
+    if (!session?.user?.id) {
+      redirect("/join?error=not-found");
+    }
     redirect("/dashboard");
   }
 
