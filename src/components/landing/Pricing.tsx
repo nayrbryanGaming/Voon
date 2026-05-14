@@ -67,7 +67,7 @@ export function Pricing() {
 
             <div className="mt-10">
               <a
-                href="/dashboard"
+                href="/sign-up"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-lg transition-all duration-200 hover:shadow-[0_0_30px_rgba(37,99,235,0.4)]"
               >
                 Daftar Gratis Sekarang
