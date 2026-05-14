@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getServerUserId } from "@/lib/session";
 import { EgressClient } from "livekit-server-sdk";
 import { prisma } from "@/lib/prisma";
 import { getLiveKitHttpUrl } from "@/lib/livekit";
@@ -9,10 +9,10 @@ export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
+  const userId = await getServerUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   const { roomName, meetingId, egressId } = await req.json();

@@ -1,15 +1,16 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Topbar } from "@/components/layout/Topbar";
 import { DashboardContent } from "./DashboardContent";
 
 export default async function DashboardPage() {
-  const { userId } = await auth();
+  const session = await auth();
+  const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
   const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
+    where: { id: userId },
     include: {
       hostedMeetings: {
         where: { status: { in: ["SCHEDULED", "LIVE"] } },

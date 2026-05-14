@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,27 +28,14 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-  if (!clerkKey || clerkKey.includes("placeholder")) {
-    return (
-      <html lang="id" suppressHydrationWarning>
-        <body>
-          {children}
-          <Toaster richColors position="top-center" />
-        </body>
-      </html>
-    );
-  }
-
   return (
-    <ClerkProvider>
-      <html lang="id" suppressHydrationWarning>
-        <body>
+    <html lang="id" suppressHydrationWarning>
+      <body>
+        <Providers>
           {children}
           <Toaster richColors position="top-center" />
-        </body>
-      </html>
-    </ClerkProvider>
+        </Providers>
+      </body>
+    </html>
   );
 }

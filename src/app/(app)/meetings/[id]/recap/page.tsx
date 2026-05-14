@@ -1,16 +1,17 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Topbar } from "@/components/layout/Topbar";
 import { RecapContent } from "./RecapContent";
 
 export default async function RecapPage({ params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
+  const session = await auth();
+  const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
   const { id } = await params;
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) redirect("/sign-in");
 
   const meeting = await prisma.meeting.findUnique({

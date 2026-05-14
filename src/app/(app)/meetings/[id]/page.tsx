@@ -1,11 +1,12 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Topbar } from "@/components/layout/Topbar";
 import { MeetingLobby } from "@/components/meeting/MeetingLobby";
 
 export default async function MeetingLobbyPage({ params }: { params: Promise<{ id: string }> }) {
-  const { userId } = await auth();
+  const session = await auth();
+  const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
   const { id } = await params;

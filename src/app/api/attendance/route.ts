@@ -1,15 +1,15 @@
-import { auth } from "@clerk/nextjs/server";
+import { getServerUserId } from "@/lib/session";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
-  const { userId } = await auth();
+  const userId = await getServerUserId();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
   const meetingId = searchParams.get("meetingId");
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return NextResponse.json([], { status: 200 });
 
   let where: { meetingId?: string; userId?: string };

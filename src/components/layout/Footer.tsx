@@ -11,7 +11,7 @@ export function Footer() {
             © 2025 Voon. Dibuat untuk kampus Indonesia. Gratis selamanya.
           </p>
           <p className="text-gray-600 text-xs font-mono">
-            Powered by LiveKit · Anthropic · Supabase · Clerk
+            Powered by LiveKit · Anthropic · Supabase · NextAuth
           </p>
         </div>
       </div>

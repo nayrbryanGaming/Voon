@@ -1,17 +1,40 @@
 "use client";
 
-import dynamic from "next/dynamic";
-
-// Load Clerk SignIn only on client (no SSR) to prevent 500 when keys aren't set
-const ClerkSignIn = dynamic(
-  () => import("@clerk/nextjs").then((m) => m.SignIn),
-  { ssr: false, loading: () => <div className="w-96 h-60 rounded-2xl bg-[var(--voon-bg-card)] animate-pulse" /> }
-);
-
-const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ?? "";
-const isClerkConfigured = clerkKey.startsWith("pk_") && clerkKey.length > 20;
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function SignInPage() {
+  const router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        username,
+        password,
+        redirect: false,
+      });
+      if (result?.error) {
+        setError("Username atau password salah.");
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
+    } catch {
+      setError("Terjadi kesalahan. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[var(--voon-bg)] flex items-center justify-center">
       <div className="text-center mb-8 absolute top-8 left-1/2 -translate-x-1/2">
@@ -21,39 +44,71 @@ export default function SignInPage() {
         </div>
       </div>
 
-      {isClerkConfigured ? (
-        <ClerkSignIn
-          appearance={{
-            elements: {
-              rootBox: "mx-auto",
-              card: "bg-[var(--voon-bg-card)] border border-white/10 shadow-2xl",
-              headerTitle: "text-white",
-              headerSubtitle: "text-gray-400",
-              formFieldLabel: "text-gray-300",
-              formFieldInput: "bg-[var(--voon-bg-elevated)] border-white/10 text-white",
-              formButtonPrimary: "bg-blue-600 hover:bg-blue-500",
-              footerActionLink: "text-blue-400 hover:text-blue-300",
-            },
-          }}
-        />
-      ) : (
-        <div className="w-full max-w-md p-8 rounded-2xl bg-[var(--voon-bg-card)] border border-white/10 shadow-2xl text-center">
-          <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl">⚙️</span>
+      <div className="w-full max-w-md p-8 rounded-2xl bg-[var(--voon-bg-card)] border border-white/10 shadow-2xl">
+        <h2 className="text-white font-bold text-2xl mb-1">Masuk ke Voon</h2>
+        <p className="text-gray-400 text-sm mb-6">Platform meeting gratis untuk kampus</p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-gray-300 text-sm mb-1.5" htmlFor="username">
+              Username atau Email
+            </label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="username atau email@kampus.ac.id"
+              required
+              className="w-full px-4 py-2.5 bg-[var(--voon-bg-elevated)] border border-white/10 rounded-xl text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 text-sm"
+            />
           </div>
-          <h2 className="text-white font-bold text-xl mb-2">Setup Diperlukan</h2>
-          <p className="text-gray-400 text-sm mb-4">
-            Autentikasi belum dikonfigurasi. Admin perlu mengatur API key Clerk di Vercel.
+          <div>
+            <label className="block text-gray-300 text-sm mb-1.5" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Minimal 8 karakter"
+              required
+              className="w-full px-4 py-2.5 bg-[var(--voon-bg-elevated)] border border-white/10 rounded-xl text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 text-sm"
+            />
+          </div>
+
+          {error && (
+            <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-2.5">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm transition-colors"
+          >
+            {loading ? "Memuat..." : "Masuk"}
+          </button>
+        </form>
+
+        <div className="mt-6 space-y-3 text-center">
+          <p className="text-gray-400 text-sm">
+            Belum punya akun?{" "}
+            <Link href="/sign-up" className="text-blue-400 hover:text-blue-300">
+              Daftar sekarang
+            </Link>
           </p>
-          <div className="text-xs text-gray-500 bg-white/5 rounded-xl p-3 text-left font-mono break-all">
-            NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...<br />
-            CLERK_SECRET_KEY=sk_live_...
-          </div>
-          <a href="/" className="mt-4 inline-block text-blue-400 hover:text-blue-300 text-sm">
-            ← Kembali ke Beranda
-          </a>
+          <p className="text-gray-500 text-xs">atau</p>
+          <Link
+            href="/join"
+            className="block text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            Bergabung sebagai tamu →
+          </Link>
         </div>
-      )}
+      </div>
     </div>
   );
 }

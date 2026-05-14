@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -7,10 +7,11 @@ import { MeetingCard } from "@/components/meeting/MeetingCard";
 import { Plus } from "lucide-react";
 
 export default async function MeetingsPage() {
-  const { userId } = await auth();
+  const session = await auth();
+  const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) redirect("/sign-in");
 
   const meetings = await prisma.meeting.findMany({
