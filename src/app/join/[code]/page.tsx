@@ -7,7 +7,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
   const meeting = await prisma.meeting.findUnique({ where: { inviteCode: code } });
 
   if (!meeting) {
-    redirect("/dashboard?error=invalid-code");
+    redirect("/join?error=invalid");
   }
 
   // If logged in, go to meeting lobby; if guest, go directly to room

@@ -57,6 +57,36 @@ export default async function RoomPage({
 
   const isHost = meeting.host?.id === user.id;
 
+  // Bug 3: Update meeting status to LIVE when host joins
+  if (isHost && meeting.status === "SCHEDULED") {
+    try {
+      await prisma.meeting.update({
+        where: { id: meeting.id },
+        data: { status: "LIVE" },
+      });
+    } catch {
+      // Non-fatal: continue even if status update fails
+    }
+  }
+
+  // Bug 4: Record attendance and participant for authenticated users
+  try {
+    if (!isHost) {
+      await prisma.attendance.upsert({
+        where: { meetingId_userId: { meetingId: meeting.id, userId: user.id } },
+        create: { meetingId: meeting.id, userId: user.id, joinedAt: new Date(), status: "PRESENT" },
+        update: { joinedAt: new Date() },
+      });
+    }
+    await prisma.participant.upsert({
+      where: { meetingId_userId: { meetingId: meeting.id, userId: user.id } },
+      create: { meetingId: meeting.id, userId: user.id, role: isHost ? "HOST" : "ATTENDEE" },
+      update: {},
+    });
+  } catch {
+    // Non-fatal: continue even if attendance recording fails
+  }
+
   return (
     <MeetingRoom
       roomId={roomId}

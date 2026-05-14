@@ -6,7 +6,9 @@ const PUBLIC_PREFIXES = [
   "/sign-in",
   "/sign-up",
   "/join",
+  "/room",
   "/api/auth",
+  "/api/livekit",
   "/api/webhooks",
   "/api/integrations", // Bearer-token auth
 ];

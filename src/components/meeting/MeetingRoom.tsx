@@ -103,6 +103,7 @@ export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName,
   const [token, setToken] = useState("");
   const [serverUrl, setServerUrl] = useState("");
   const [error, setError] = useState("");
+  const [wasConnected, setWasConnected] = useState(false);
 
   useEffect(() => {
     fetch("/api/livekit", {
@@ -113,6 +114,10 @@ export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName,
       .then((r) => r.json())
       .then((data) => {
         if (data.error) throw new Error(data.error);
+        if (!data.serverUrl) {
+          setError("LiveKit server tidak dikonfigurasi. Hubungi administrator.");
+          return;
+        }
         setToken(data.token);
         setServerUrl(data.serverUrl);
       })
@@ -150,7 +155,12 @@ export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName,
       connect={true}
       audio={true}
       video={true}
-      onDisconnected={() => window.location.href = meetingId ? `/meetings/${meetingId}/recap` : "/dashboard"}
+      onConnected={() => setWasConnected(true)}
+      onDisconnected={() => {
+        if (wasConnected) {
+          window.location.href = meetingId ? `/meetings/${meetingId}/recap` : "/dashboard";
+        }
+      }}
     >
       <RoomInner
         meetingId={meetingId}

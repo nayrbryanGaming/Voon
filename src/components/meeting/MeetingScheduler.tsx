@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -81,7 +81,11 @@ const COLOR_MAP: Record<string, string> = {
   emerald: "border-emerald-500/40 bg-emerald-500/10 text-emerald-400",
 };
 
-export function MeetingScheduler() {
+interface MeetingSchedulerProps {
+  instant?: boolean;
+}
+
+export function MeetingScheduler({ instant = false }: MeetingSchedulerProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<string | null>(null);
@@ -94,11 +98,40 @@ export function MeetingScheduler() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      startTime: new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16),
+      title: instant ? "Meeting Instan" : "",
+      startTime: new Date().toISOString().slice(0, 16),
       isPublic: false,
       isRecorded: false,
     },
   });
+
+  useEffect(() => {
+    if (instant) {
+      const submit = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch("/api/meetings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: "Meeting Instan",
+              startTime: new Date().toISOString(),
+              isPublic: false,
+              isRecorded: false,
+            }),
+          });
+          if (!res.ok) throw new Error("Gagal membuat meeting");
+          const meeting = await res.json();
+          toast.success("Meeting instan dimulai!");
+          router.push(`/meetings/${meeting.id}`);
+        } catch {
+          toast.error("Gagal membuat meeting instan. Coba lagi.");
+          setLoading(false);
+        }
+      };
+      submit();
+    }
+  }, [instant, router]);
 
   const applyTemplate = (tpl: (typeof MEETING_TEMPLATES)[number]) => {
     setActiveTemplate(tpl.id);
