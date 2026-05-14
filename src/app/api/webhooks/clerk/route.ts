@@ -39,6 +39,14 @@ export async function POST(req: Request) {
     const email = data.email_addresses?.[0]?.email_address ?? "";
     const name = `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim() || "Pengguna";
 
+    // Auto-detect campus from email domain (e.g. user@unhas.ac.id → Campus {domain: "unhas.ac.id"})
+    const emailDomain = email.split("@")[1]?.toLowerCase() ?? "";
+    let campusId: string | null = null;
+    if (emailDomain) {
+      const campus = await prisma.campus.findUnique({ where: { domain: emailDomain } });
+      if (campus) campusId = campus.id;
+    }
+
     await prisma.user.upsert({
       where: { clerkId: data.id },
       create: {
@@ -46,11 +54,13 @@ export async function POST(req: Request) {
         email,
         name,
         avatarUrl: data.image_url || null,
+        ...(campusId ? { campusId } : {}),
       },
       update: {
         email,
         name,
         avatarUrl: data.image_url || null,
+        ...(campusId ? { campusId } : {}),
       },
     });
   }
