@@ -35,6 +35,10 @@ export default function middleware(req: NextRequest) {
     req.cookies.get("authjs.session-token")?.value;
 
   if (!sessionToken) {
+    // Return JSON 401 for API routes; redirect to sign-in for pages
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
