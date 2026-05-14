@@ -37,12 +37,10 @@ export default function SignInPage() {
 
   return (
     <div className="min-h-screen bg-[var(--voon-bg)] flex items-center justify-center">
-      <div className="text-center mb-8 absolute top-8 left-1/2 -translate-x-1/2">
-        <div className="flex items-center gap-2 justify-center">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white text-lg">V</div>
-          <span className="text-white font-bold text-2xl">Voon</span>
-        </div>
-      </div>
+      <Link href="/" className="flex items-center gap-2 justify-center absolute top-8 left-1/2 -translate-x-1/2 group">
+        <div className="w-10 h-10 rounded-xl bg-blue-600 group-hover:bg-blue-500 transition-colors flex items-center justify-center font-bold text-white text-lg">V</div>
+        <span className="text-white font-bold text-2xl">Voon</span>
+      </Link>
 
       <div className="w-full max-w-md p-8 rounded-2xl bg-[var(--voon-bg-card)] border border-white/10 shadow-2xl">
         <h2 className="text-white font-bold text-2xl mb-1">Masuk ke Voon</h2>
