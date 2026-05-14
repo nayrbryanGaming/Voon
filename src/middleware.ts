@@ -3,7 +3,14 @@ import type { NextRequest } from "next/server";
 
 // Simple public-path list — no Clerk import to avoid Edge Runtime crash when keys are empty.
 // When real Clerk keys are set in Vercel, re-enable Clerk middleware here.
-const PUBLIC_PREFIXES = ["/", "/sign-in", "/sign-up", "/join", "/api/webhooks"];
+const PUBLIC_PREFIXES = [
+  "/",
+  "/sign-in",
+  "/sign-up",
+  "/join",
+  "/api/webhooks",
+  "/api/integrations", // Bearer-token auth, not Clerk
+];
 
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_PREFIXES.some(
