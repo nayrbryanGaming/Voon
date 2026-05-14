@@ -1,14 +1,24 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Link2, ArrowRight, Loader2 } from "lucide-react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Link2, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
-export default function JoinPage() {
+function JoinForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (urlError === "invalid") {
+      setError("Kode meeting tidak valid atau sudah kadaluarsa.");
+    } else if (urlError === "not-found") {
+      setError("Meeting tidak ditemukan atau telah dibatalkan.");
+    }
+  }, [searchParams]);
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +60,12 @@ export default function JoinPage() {
                 className="w-full pl-9 pr-4 py-3 bg-[var(--voon-bg-elevated)] border border-white/10 rounded-xl text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500/50 text-sm tracking-widest font-mono"
               />
             </div>
-            {error && <p className="text-red-400 text-xs mt-2">{error}</p>}
+            {error && (
+              <div className="flex items-center gap-2 mt-2 text-red-400 text-xs">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                {error}
+              </div>
+            )}
           </div>
 
           <button
@@ -71,11 +86,19 @@ export default function JoinPage() {
 
         <p className="text-center text-gray-500 text-sm mt-6">
           Atau{" "}
-          <a href="/meetings/new" className="text-blue-400 hover:text-blue-300">
-            buat meeting baru
+          <a href="/sign-in" className="text-blue-400 hover:text-blue-300">
+            masuk untuk buat meeting
           </a>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function JoinPage() {
+  return (
+    <Suspense>
+      <JoinForm />
+    </Suspense>
   );
 }

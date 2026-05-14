@@ -27,14 +27,19 @@ interface MeetingRoomProps {
   guestName?: string;
 }
 
-function RoomInner({ meetingId, meetingTitle, isHost, userId, userName }: Omit<MeetingRoomProps, "roomId">) {
+function RoomInner({ meetingId, meetingTitle, isHost, userId, userName, guestName }: Omit<MeetingRoomProps, "roomId">) {
   const router = useRouter();
   const [panel, setPanel] = useState<"chat" | "participants" | "polls" | "qa" | null>(null);
   const [captionsEnabled, setCaptionsEnabled] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
 
   const handleLeave = () => {
-    router.push(meetingId ? `/meetings/${meetingId}/recap` : "/dashboard");
+    // Guests can't access /recap or /dashboard — redirect them to /join
+    if (guestName) {
+      router.push("/join");
+    } else {
+      router.push(meetingId ? `/meetings/${meetingId}/recap` : "/dashboard");
+    }
   };
 
   return (
@@ -158,7 +163,12 @@ export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName,
       onConnected={() => setWasConnected(true)}
       onDisconnected={() => {
         if (wasConnected) {
-          window.location.href = meetingId ? `/meetings/${meetingId}/recap` : "/dashboard";
+          // Guests can't access /recap or /dashboard (protected routes)
+          if (guestName) {
+            window.location.href = "/join";
+          } else {
+            window.location.href = meetingId ? `/meetings/${meetingId}/recap` : "/dashboard";
+          }
         }
       }}
     >
@@ -168,6 +178,7 @@ export function MeetingRoom({ roomId, meetingId, meetingTitle, userId, userName,
         isHost={isHost}
         userId={userId}
         userName={userName ?? "Peserta"}
+        guestName={guestName}
       />
     </LiveKitRoom>
   );
