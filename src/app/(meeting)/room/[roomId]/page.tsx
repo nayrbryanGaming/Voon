@@ -23,14 +23,13 @@ export default async function RoomPage({
   });
 
   if (!meeting || meeting.status === "CANCELLED") {
-    // Guests can't access /dashboard (protected) — redirect them to /join
     if (!session?.user?.id) {
       redirect("/join?error=not-found");
     }
     redirect("/dashboard");
   }
 
-  // If not logged in and no guest name — show guest join form
+  // Not logged in + no guest name → show guest join form
   if (!session?.user?.id) {
     if (!guestName) {
       return (
@@ -41,7 +40,6 @@ export default async function RoomPage({
         />
       );
     }
-    // Guest with a name — join directly
     return (
       <MeetingRoom
         roomId={roomId}
@@ -61,7 +59,6 @@ export default async function RoomPage({
 
   const isHost = meeting.host?.id === user.id;
 
-  // Bug 3: Update meeting status to LIVE when host joins
   if (isHost && meeting.status === "SCHEDULED") {
     try {
       await prisma.meeting.update({
@@ -69,11 +66,10 @@ export default async function RoomPage({
         data: { status: "LIVE" },
       });
     } catch {
-      // Non-fatal: continue even if status update fails
+      // Non-fatal
     }
   }
 
-  // Bug 4: Record attendance and participant for authenticated users
   try {
     if (!isHost) {
       await prisma.attendance.upsert({
@@ -88,7 +84,7 @@ export default async function RoomPage({
       update: {},
     });
   } catch {
-    // Non-fatal: continue even if attendance recording fails
+    // Non-fatal
   }
 
   return (
