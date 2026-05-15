@@ -4,13 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { summarizeMeeting, extractActionItems } from "@/lib/ai";
 
 export async function POST(req: Request) {
+  const livekitKey = process.env.LIVEKIT_API_KEY;
+  const livekitSecret = process.env.LIVEKIT_API_SECRET;
+  if (!livekitKey || !livekitSecret) {
+    return NextResponse.json({ error: "LiveKit not configured" }, { status: 503 });
+  }
+
   const body = await req.text();
   const authorization = req.headers.get("Authorization");
 
-  const receiver = new WebhookReceiver(
-    process.env.LIVEKIT_API_KEY!,
-    process.env.LIVEKIT_API_SECRET!
-  );
+  const receiver = new WebhookReceiver(livekitKey, livekitSecret);
 
   let event: WebhookEvent;
   try {

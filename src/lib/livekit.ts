@@ -12,11 +12,10 @@ export function getLiveKitHttpUrl(): string {
 }
 
 export function getLiveKitClient() {
-  return new RoomServiceClient(
-    getLiveKitHttpUrl(),
-    process.env.LIVEKIT_API_KEY!,
-    process.env.LIVEKIT_API_SECRET!
-  );
+  const key = process.env.LIVEKIT_API_KEY;
+  const secret = process.env.LIVEKIT_API_SECRET;
+  if (!key || !secret) throw new Error("LIVEKIT_API_KEY and LIVEKIT_API_SECRET must be set");
+  return new RoomServiceClient(getLiveKitHttpUrl(), key, secret);
 }
 
 export async function generateToken({
@@ -30,9 +29,12 @@ export async function generateToken({
   participantId: string;
   isHost?: boolean;
 }) {
+  const key = process.env.LIVEKIT_API_KEY;
+  const secret = process.env.LIVEKIT_API_SECRET;
+  if (!key || !secret) throw new Error("LIVEKIT_API_KEY and LIVEKIT_API_SECRET must be set");
   const at = new AccessToken(
-    process.env.LIVEKIT_API_KEY!,
-    process.env.LIVEKIT_API_SECRET!,
+    key,
+    secret,
     {
       identity: participantId,
       name: participantName,

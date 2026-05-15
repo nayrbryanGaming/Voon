@@ -53,8 +53,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/sign-in",
     newUser: "/sign-up",
   },
-  secret:
-    process.env.NEXTAUTH_SECRET ??
-    process.env.CLERK_SECRET_KEY ??
-    "voon-secret-dev-key-change-in-prod",
+  secret: (() => {
+    const s = process.env.NEXTAUTH_SECRET ?? process.env.CLERK_SECRET_KEY;
+    if (!s && process.env.NODE_ENV === "production") {
+      console.error("[Voon] NEXTAUTH_SECRET is not set in production — sessions are insecure!");
+    }
+    return s ?? "voon-dev-secret-replace-in-production";
+  })(),
 });
