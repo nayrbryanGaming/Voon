@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { WebhookReceiver, WebhookEvent } from "livekit-server-sdk";
 import { prisma } from "@/lib/prisma";
-import { summarizeMeeting, extractActionItems } from "@/lib/anthropic";
+import { summarizeMeeting, extractActionItems } from "@/lib/ai";
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -48,16 +48,18 @@ export async function POST(req: Request) {
       if (transcript) {
         try {
           const duration = Math.round((Date.now() - meeting.startTime.getTime()) / 1000);
-          const summaryData = await summarizeMeeting(transcript.content, meeting.title, duration);
-          const actionData = await extractActionItems(transcript.content);
+          const summaryRaw = await summarizeMeeting(transcript.content, meeting.title, duration);
+          const actionRaw = await extractActionItems(transcript.content);
+          const summaryData = summaryRaw as { summary?: string; keyPoints?: string[]; topics?: string[]; sentiment?: string };
+          const actionData = actionRaw as { actionItems?: { task: string; assignee: string }[] };
 
           await prisma.meetingSummary.upsert({
             where: { meetingId: meeting.id },
             create: {
               meetingId: meeting.id,
-              summary: summaryData.summary,
+              summary: summaryData.summary ?? "",
               keyPoints: summaryData.keyPoints ?? [],
-              actionItems: actionData.actionItems?.map((a: { task: string; assignee: string }) => `${a.task} (${a.assignee})`) ?? [],
+              actionItems: actionData.actionItems?.map((a) => `${a.task} (${a.assignee})`) ?? [],
               topics: summaryData.topics ?? [],
               sentiment: summaryData.sentiment ?? null,
             },

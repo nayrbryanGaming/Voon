@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Topbar } from "@/components/layout/Topbar";
 import { RecordingsContent } from "./RecordingsContent";
 
+export const dynamic = "force-dynamic";
+
 export default async function RecordingsPage() {
   const session = await auth();
   const userId = session?.user?.id;
@@ -21,7 +23,7 @@ export default async function RecordingsPage() {
   return (
     <div className="min-h-screen">
       <Topbar title="Rekaman" />
-      <RecordingsContent meetings={meetings} />
+      <RecordingsContent meetings={meetings} totalCount={meetings.length} />
     </div>
   );
 }

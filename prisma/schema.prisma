@@ -8,22 +8,25 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  clerkId      String?  @unique
-  username     String?  @unique
-  passwordHash String?
-  email        String   @unique
-  name         String
-  avatarUrl    String?
-  role         UserRole @default(STUDENT)
-  campusId     String?
-  campus       Campus?  @relation(fields: [campusId], references: [id], onDelete: SetNull)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                String           @id @default(cuid())
+  clerkId           String?          @unique
+  username          String?          @unique
+  passwordHash      String?
+  email             String           @unique
+  name              String
+  avatarUrl         String?
+  role              UserRole         @default(STUDENT)
+  campusId          String?
+  campus            Campus?          @relation(fields: [campusId], references: [id], onDelete: SetNull)
+  subscriptionTier  SubscriptionTier @default(FREE)
+  apiTokenEncrypted String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
 
   hostedMeetings    Meeting[]     @relation("Host")
   participations    Participant[]
   attendanceRecords Attendance[]
+  recordings        Recording[]
 
   @@index([clerkId])
   @@index([username])
@@ -35,6 +38,11 @@ enum UserRole {
   STUDENT
   LECTURER
   ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  PREMIUM
 }
 
 model Campus {
@@ -64,6 +72,9 @@ model Meeting {
   maxParticipants Int?
   isPublic        Boolean       @default(false)
   inviteCode      String        @unique @default(cuid())
+  // Host-configured permissions (persisted for rejoin)
+  screenShareLocked Boolean     @default(false)
+  videoStreamLocked Boolean     @default(false)
   createdAt       DateTime      @default(now())
 
   participants Participant[]
@@ -71,6 +82,7 @@ model Meeting {
   transcript   Transcript?
   summary      MeetingSummary?
   polls        Poll[]
+  recordings   Recording[]
   whiteboardId String?
 
   @@index([hostId])
@@ -84,6 +96,26 @@ enum MeetingStatus {
   LIVE
   ENDED
   CANCELLED
+}
+
+model Recording {
+  id          String   @id @default(cuid())
+  meetingId   String
+  meeting     Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  filename    String
+  s3Key       String?
+  storageUrl  String?
+  fileSize    BigInt?
+  durationSec Int?
+  egressId    String?
+  quality     String   @default("original")
+  createdAt   DateTime @default(now())
+
+  @@index([meetingId])
+  @@index([userId])
+  @@index([egressId])
 }
 
 model Participant {
