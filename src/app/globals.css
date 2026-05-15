@@ -281,6 +281,24 @@ body {
   height: 100%;
 }
 
+/* ─── Floating emoji reaction ────────────────────────────── */
+.voon-reaction {
+  position: absolute;
+  left: var(--rx, 50%);
+  top: var(--ry, 50%);
+  font-size: 2rem;
+  pointer-events: none;
+  z-index: 40;
+  will-change: opacity, transform;
+  animation: reaction-float 2.5s ease-out forwards;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.5));
+}
+@keyframes reaction-float {
+  0%   { opacity: 1; transform: translateY(0) scale(1); }
+  70%  { opacity: 1; transform: translateY(-40px) scale(1.2); }
+  100% { opacity: 0; transform: translateY(-70px) scale(0.8); }
+}
+
 /* ─── Mobile control bar: make it feel native ────────────── */
 @media (max-width: 640px) {
   /* Remove backdrop blur from control bar (expensive on mobile GPU) */

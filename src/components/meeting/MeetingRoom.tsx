@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, lazy, Suspense, useCallback } from "react";
+import React, { useState, useEffect, lazy, Suspense, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   LiveKitRoom,
@@ -12,6 +12,8 @@ import { VideoPresets } from "livekit-client";
 import { ArrowLeft, WifiOff } from "lucide-react";
 import { VideoGrid } from "./VideoGrid";
 import { ControlBar } from "./ControlBar";
+import { RaiseHandIndicator } from "./RaiseHandIndicator";
+import { useMeetingStore } from "@/store/useMeetingStore";
 
 const ChatPanel       = lazy(() => import("./ChatPanel").then(m => ({ default: m.ChatPanel })));
 const ParticipantsList = lazy(() => import("./ParticipantsList").then(m => ({ default: m.ParticipantsList })));
@@ -125,11 +127,17 @@ function RoomInner({
     };
   }, []);
 
+  const raiseHand  = useMeetingStore((s) => s.raiseHand);
+  const lowerHand  = useMeetingStore((s) => s.lowerHand);
+  const addReaction = useMeetingStore((s) => s.addReaction);
+  const reactions   = useMeetingStore((s) => s.reactions);
+
   // DataChannel message handler
   useEffect(() => {
-    const handler = (payload: Uint8Array) => {
+    const handler = (payload: Uint8Array, participant?: { name?: string; identity?: string }) => {
       try {
         const msg = JSON.parse(new TextDecoder().decode(payload)) as Record<string, unknown>;
+        const senderName = participant?.name ?? "Peserta";
 
         switch (msg.type) {
           case "mute-all":
@@ -158,7 +166,8 @@ function RoomInner({
 
           case "reaction": {
             const emoji = (msg.emoji as string) ?? "👍";
-            const fromName = (msg.fromName as string) ?? "Peserta";
+            const fromName = (msg.fromName as string) ?? senderName;
+            if (emoji) addReaction(emoji);
             const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
             setFloatingReactions((prev) => [...prev.slice(-7), { id, emoji, name: fromName }]);
             setTimeout(() => setFloatingReactions((prev) => prev.filter((r) => r.id !== id)), 3500);
@@ -166,10 +175,18 @@ function RoomInner({
           }
 
           case "raise-hand": {
-            const raiser = (msg.fromName as string) ?? "Seseorang";
-            const identity = (msg.identity as string) ?? raiser;
+            const fromName = (msg.fromName as string) ?? senderName;
+            const identity = (msg.identity as string) ?? fromName;
+            raiseHand(fromName);
+            setTimeout(() => { lowerHand(fromName); setRaisedHands((prev) => prev.filter((r) => r !== identity)); }, 15_000);
             setRaisedHands((prev) => prev.includes(identity) ? prev : [...prev, identity]);
-            setTimeout(() => setRaisedHands((prev) => prev.filter((r) => r !== identity)), 10000);
+            break;
+          }
+
+          case "lower-hand": {
+            const fromName = (msg.fromName as string) ?? senderName;
+            lowerHand(fromName);
+            setRaisedHands((prev) => prev.filter((r) => r !== fromName));
             break;
           }
 
@@ -180,7 +197,7 @@ function RoomInner({
     };
     room.on("dataReceived", handler);
     return () => { room.off("dataReceived", handler); };
-  }, [room, guestName, meetingId]);
+  }, [room, guestName, meetingId, raiseHand, lowerHand, addReaction]);
 
   const resolvedInviteCode = inviteCode ?? "------";
 
@@ -345,6 +362,21 @@ function RoomInner({
             <AnnotationCanvas onClose={() => setAnnotating(false)} />
           </Suspense>
         )}
+
+        {/* Raise-hand indicator (bottom-left of video area) */}
+        <RaiseHandIndicator />
+
+        {/* Floating emoji reactions */}
+        {reactions.map((r) => (
+          <div
+            key={r.id}
+            className="voon-reaction"
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            style={{ "--rx": `${r.x}%`, "--ry": `${r.y}%` } as React.CSSProperties}
+          >
+            {r.emoji}
+          </div>
+        ))}
       </div>
 
       {/* ── Control bar ───────────────────────────────────────── */}
@@ -478,14 +510,16 @@ export function MeetingRoom({
         dynacast: true,
         publishDefaults: {
           simulcast: true,
-          videoSimulcastLayers: [VideoPresets.h90, VideoPresets.h216],
-          dtx: true,
+          // h90 (160×90) for thumbnails, h180 (320×180) as mid layer — keeps bandwidth low on slow networks
+          videoSimulcastLayers: [VideoPresets.h90, VideoPresets.h180],
+          dtx: true,      // discontinuous transmission — saves CPU when silent
           red: true,
           videoCodec: "vp8",
           backupCodec: false,
         },
         videoCaptureDefaults: {
-          resolution: VideoPresets.h360.resolution,
+          // 216p default: renders fine in tiles, saves CPU/GPU on low-end devices
+          resolution: VideoPresets.h216.resolution,
         },
         audioCaptureDefaults: {
           echoCancellation: true,
