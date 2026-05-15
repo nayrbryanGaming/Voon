@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRecording } from "@/hooks/useRecording";
+import { NoiseToggle } from "./NoiseToggle";
 import type { ScreenShareCaptureOptions } from "livekit-client";
 
 type PanelType = "chat" | "participants" | "polls" | "qa" | "invite" | "settings" | "music" | "bg";
@@ -328,6 +329,9 @@ export function ControlBar({
             <span className="text-[10px] leading-tight hidden sm:block">Coret</span>
           </button>
         )}
+
+        {/* ── Noise cancellation ── */}
+        <NoiseToggle className="flex-shrink-0" />
 
         {/* ── Push to Talk toggle ── */}
         <button type="button" onClick={() => setPushToTalk((p) => !p)}
