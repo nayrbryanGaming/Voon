@@ -22,6 +22,7 @@ const PAGE_SIZE = 9;
 interface VideoGridProps {
   annotating?: boolean;
   onScreenShareChange?: (sharing: boolean) => void;
+  raisedHands?: string[];
 }
 
 /* ─── Single tile ─────────────────────────────────────────── */
@@ -29,10 +30,12 @@ const VideoTile = memo(function VideoTile({
   track,
   big = false,
   className,
+  hasRaisedHand = false,
 }: {
   track: TrackReferenceOrPlaceholder;
   big?: boolean;
   className?: string;
+  hasRaisedHand?: boolean;
 }) {
   const isSpeaking = useIsSpeaking(track.participant);
   return (
@@ -45,6 +48,11 @@ const VideoTile = memo(function VideoTile({
       )}
     >
       <ParticipantTile trackRef={track} className="w-full h-full" />
+      {hasRaisedHand && (
+        <div className="absolute top-2 right-2 text-xl bg-black/50 rounded-full w-7 h-7 flex items-center justify-center pointer-events-none z-10">
+          ✋
+        </div>
+      )}
     </div>
   );
 });
@@ -95,11 +103,13 @@ function GalleryView({
   page,
   setPage,
   totalPages,
+  raisedHands = [],
 }: {
   tracks: TrackReferenceOrPlaceholder[];
   page: number;
   setPage: (p: number | ((prev: number) => number)) => void;
   totalPages: number;
+  raisedHands?: string[];
 }) {
   const n = tracks.length;
 
@@ -122,6 +132,7 @@ function GalleryView({
           <VideoTile
             key={`${track.participant.identity}-${track.source}`}
             track={track}
+            hasRaisedHand={raisedHands.includes(track.participant.identity)}
           />
         ))}
       </div>
@@ -268,7 +279,7 @@ function PresentationView({
 }
 
 /* ─── Main VideoGrid ──────────────────────────────────────── */
-export function VideoGrid({ annotating = false, onScreenShareChange }: VideoGridProps) {
+export function VideoGrid({ annotating = false, onScreenShareChange, raisedHands = [] }: VideoGridProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("gallery");
   const [perfMode, setPerfMode] = useState(false);
   const [page, setPage] = useState(0);
@@ -428,6 +439,7 @@ export function VideoGrid({ annotating = false, onScreenShareChange }: VideoGrid
           page={page}
           setPage={handleSetPage}
           totalPages={totalPages}
+          raisedHands={raisedHands}
         />
       )}
     </div>

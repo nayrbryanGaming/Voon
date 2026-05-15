@@ -197,18 +197,38 @@ export function ControlBar({
   }, [localParticipant]);
 
   const sendReaction = useCallback((emoji: string) => {
-    room.localParticipant?.publishData(new TextEncoder().encode(JSON.stringify({ type: "reaction", emoji })));
+    const name = room.localParticipant?.name ?? room.localParticipant?.identity ?? "Peserta";
+    room.localParticipant?.publishData(
+      new TextEncoder().encode(JSON.stringify({ type: "reaction", emoji, fromName: name })),
+      { reliable: true }
+    );
+    // Also show own reaction locally
     setShowReactions(false);
   }, [room]);
 
   const raiseHand = useCallback(() => {
-    room.localParticipant?.publishData(new TextEncoder().encode(JSON.stringify({ type: "raise-hand" })));
+    const name = room.localParticipant?.name ?? room.localParticipant?.identity ?? "Peserta";
+    room.localParticipant?.publishData(
+      new TextEncoder().encode(JSON.stringify({
+        type: "raise-hand",
+        fromName: name,
+        identity: room.localParticipant?.identity,
+      })),
+      { reliable: true }
+    );
   }, [room]);
 
-  // Host: disable all cameras
+  const muteAll = useCallback(() => {
+    room.localParticipant?.publishData(
+      new TextEncoder().encode(JSON.stringify({ type: "mute-all" })),
+      { reliable: true }
+    );
+  }, [room]);
+
   const disableAllCameras = useCallback(() => {
     room.localParticipant?.publishData(
-      new TextEncoder().encode(JSON.stringify({ type: "disable-cameras-all" }))
+      new TextEncoder().encode(JSON.stringify({ type: "disable-cameras-all" })),
+      { reliable: true }
     );
   }, [room]);
 
@@ -405,6 +425,13 @@ export function ControlBar({
                 </button>
 
                 <div className="h-px bg-white/5 my-1" />
+
+                {/* Mute all */}
+                <button type="button" onClick={() => { muteAll(); setShowMore(false); }}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-orange-400 hover:bg-orange-600/20 transition-colors text-left">
+                  <MicOff className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm">Bisukan Semua Mic</span>
+                </button>
 
                 {/* Disable all cameras */}
                 <button type="button" onClick={() => { disableAllCameras(); setShowMore(false); }}

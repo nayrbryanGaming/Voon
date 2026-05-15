@@ -70,6 +70,8 @@ function RoomInner({
   const [chatLocked, setChatLocked] = useState(false);
   const [screenShareLocked, setScreenShareLocked] = useState(false);
   const [mediaAllowed, setMediaAllowed] = useState(true);
+  const [floatingReactions, setFloatingReactions] = useState<{ id: string; emoji: string; name: string }[]>([]);
+  const [raisedHands, setRaisedHands] = useState<string[]>([]);
 
   const handleLeave = useCallback(() => {
     try { room.disconnect(); } catch { /* ignore */ }
@@ -150,10 +152,26 @@ function RoomInner({
             if (msg.chatLocked !== undefined) setChatLocked(Boolean(msg.chatLocked));
             if (msg.screenShareLocked !== undefined) setScreenShareLocked(Boolean(msg.screenShareLocked));
             if (msg.mediaAllowed !== undefined) setMediaAllowed(Boolean(msg.mediaAllowed));
-            // Enforce immediately
             if (msg.micLocked) room.localParticipant?.setMicrophoneEnabled(false);
             if (msg.camLocked) room.localParticipant?.setCameraEnabled(false);
             break;
+
+          case "reaction": {
+            const emoji = (msg.emoji as string) ?? "👍";
+            const fromName = (msg.fromName as string) ?? "Peserta";
+            const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            setFloatingReactions((prev) => [...prev.slice(-7), { id, emoji, name: fromName }]);
+            setTimeout(() => setFloatingReactions((prev) => prev.filter((r) => r.id !== id)), 3500);
+            break;
+          }
+
+          case "raise-hand": {
+            const raiser = (msg.fromName as string) ?? "Seseorang";
+            const identity = (msg.identity as string) ?? raiser;
+            setRaisedHands((prev) => prev.includes(identity) ? prev : [...prev, identity]);
+            setTimeout(() => setRaisedHands((prev) => prev.filter((r) => r !== identity)), 10000);
+            break;
+          }
 
           default:
             break;
@@ -217,6 +235,7 @@ function RoomInner({
         <VideoGrid
           annotating={annotating}
           onScreenShareChange={setIsScreenSharing}
+          raisedHands={raisedHands}
         />
 
         {/* Side panels */}
@@ -288,6 +307,36 @@ function RoomInner({
 
         {captionsEnabled && (
           <Suspense fallback={null}><LiveCaptionsOverlay /></Suspense>
+        )}
+
+        {/* Floating reaction overlay */}
+        {floatingReactions.length > 0 && (
+          <div className="absolute bottom-4 left-4 flex flex-col-reverse gap-1.5 pointer-events-none z-30">
+            {floatingReactions.map((r) => (
+              <div
+                key={r.id}
+                className="flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-2.5 py-1 rounded-full animate-slide-in-left"
+              >
+                <span className="text-xl leading-none">{r.emoji}</span>
+                <span className="text-xs text-white/80 max-w-[80px] truncate">{r.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Raised hand notifications */}
+        {raisedHands.length > 0 && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 flex flex-col gap-1 pointer-events-none z-30">
+            {raisedHands.slice(0, 3).map((identity) => (
+              <div
+                key={identity}
+                className="flex items-center gap-1.5 bg-amber-500/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-lg"
+              >
+                <span className="text-sm">✋</span>
+                <span className="text-xs text-white font-medium max-w-[120px] truncate">{identity} mengangkat tangan</span>
+              </div>
+            ))}
+          </div>
         )}
 
         {/* Annotation canvas overlay — shown during screen share when annotating */}
@@ -446,7 +495,7 @@ export function MeetingRoom({
           channelCount: 1,
         },
         stopLocalTrackOnUnpublish: true,
-        disconnectOnPageLeave: true,
+        disconnectOnPageLeave: false,
       }}
       onConnected={() => setWasConnected(true)}
       onDisconnected={() => {

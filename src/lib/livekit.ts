@@ -38,7 +38,7 @@ export async function generateToken({
     {
       identity: participantId,
       name: participantName,
-      ttl: "4h",
+      ttl: "24h",
     }
   );
 
