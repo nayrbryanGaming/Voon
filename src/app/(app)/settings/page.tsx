@@ -115,9 +115,9 @@ export default async function SettingsPage() {
           </h2>
           <div className="space-y-2 text-sm text-gray-400">
             <p>Versi: 1.0.0</p>
-            <p>Stack: Next.js 15 · LiveKit · Groq AI · Supabase · NextAuth</p>
+            <p>Stack: Next.js 15 · LiveKit · Groq / Claude AI · Supabase · NextAuth</p>
             <p className="text-emerald-400">Gratis selamanya untuk kampus Indonesia</p>
-            <p className="text-xs text-gray-600">AI default: Groq Llama 3.1 (gratis) · AI premium: token sendiri</p>
+            <p className="text-xs text-gray-600">AI default: Groq Llama 3.1 (free tier) · AI premium: Anthropic Claude (token sendiri)</p>
           </div>
         </div>
       </div>

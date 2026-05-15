@@ -1,17 +1,30 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-export const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY!,
-});
-
 export const AI_MODEL = "claude-sonnet-4-20250514";
+
+let _client: Anthropic | null = null;
+
+export function getAnthropicClient(): Anthropic {
+  if (!_client) {
+    const key = process.env.ANTHROPIC_API_KEY;
+    if (!key) throw new Error("ANTHROPIC_API_KEY is not configured");
+    _client = new Anthropic({ apiKey: key });
+  }
+  return _client;
+}
+
+// Legacy named export for backward compatibility (callers use @/lib/ai instead)
+export const anthropic = {
+  get messages() { return getAnthropicClient().messages; },
+} as unknown as Anthropic;
 
 export async function summarizeMeeting(
   transcript: string,
   title: string,
   duration: number
 ) {
-  const response = await anthropic.messages.create({
+  const client = getAnthropicClient();
+  const response = await client.messages.create({
     model: AI_MODEL,
     max_tokens: 2048,
     system: `You are an academic meeting assistant for Indonesian university.
@@ -45,7 +58,8 @@ export async function generateQuiz(
   topic: string,
   difficulty: "easy" | "medium" | "hard" = "medium"
 ) {
-  const response = await anthropic.messages.create({
+  const client = getAnthropicClient();
+  const response = await client.messages.create({
     model: AI_MODEL,
     max_tokens: 2048,
     system: `Generate a 5-question multiple choice quiz in Indonesian based on the meeting/lecture content.
@@ -78,7 +92,8 @@ Respond ONLY with valid JSON:
 }
 
 export async function extractActionItems(transcript: string) {
-  const response = await anthropic.messages.create({
+  const client = getAnthropicClient();
+  const response = await client.messages.create({
     model: AI_MODEL,
     max_tokens: 1024,
     system: `Extract action items from the meeting transcript. Respond ONLY with valid JSON:
@@ -110,7 +125,8 @@ export async function extractActionItems(transcript: string) {
 }
 
 export async function cleanupCaption(rawText: string, language: string) {
-  const response = await anthropic.messages.create({
+  const client = getAnthropicClient();
+  const response = await client.messages.create({
     model: AI_MODEL,
     max_tokens: 256,
     system: `Clean up speech recognition text. Fix grammar, punctuation, and spelling. Keep the language as ${language}. Return only the cleaned text, nothing else.`,

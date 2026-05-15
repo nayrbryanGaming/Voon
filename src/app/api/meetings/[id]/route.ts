@@ -54,6 +54,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const existing = await prisma.meeting.findUnique({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (existing.hostId !== user.id) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (existing.status === "ENDED" || existing.status === "CANCELLED") {
+    return NextResponse.json({ error: "Cannot modify a completed or cancelled meeting" }, { status: 409 });
+  }
 
   const body = await req.json();
   const { title, description, startTime, maxParticipants, isPublic, isRecorded, status } = body;
