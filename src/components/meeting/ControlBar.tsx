@@ -9,11 +9,12 @@ import {
   Mic, MicOff, Video, VideoOff, Monitor, MonitorOff, MessageSquare, Users,
   Brain, Hand, Smile, LogOut, Subtitles, Circle, StopCircle, BarChart2, HelpCircle,
   Link2, Settings, Music, PictureInPicture2, Volume2, VolumeX, ChevronUp,
-  MonitorPlay, Pencil, PencilOff, ImageIcon,
+  MonitorPlay, Pencil, PencilOff, ImageIcon, RefreshCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRecording } from "@/hooks/useRecording";
 import { NoiseToggle } from "./NoiseToggle";
+import { Track } from "livekit-client";
 import type { ScreenShareCaptureOptions } from "livekit-client";
 
 type PanelType = "chat" | "participants" | "polls" | "qa" | "invite" | "settings" | "music" | "bg";
@@ -132,6 +133,7 @@ export function ControlBar({
   const [showScreenShareDialog, setShowScreenShareDialog] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [pushToTalk, setPushToTalk] = useState(false);
+  const [hasMultipleCams, setHasMultipleCams] = useState(false);
   const pttActive = useRef(false);
   const { isRecording, loading: recLoading, startRecording, stopRecording } = useRecording(meetingId);
   const moreRef = useRef<HTMLDivElement>(null);
@@ -226,6 +228,27 @@ export function ControlBar({
     );
   }, [room]);
 
+  // Detect if device has multiple cameras (front/back)
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const cams = devices.filter((d) => d.kind === "videoinput");
+      setHasMultipleCams(cams.length >= 2);
+    }).catch(() => {});
+  }, []);
+
+  const flipCamera = useCallback(async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const cams = devices.filter((d) => d.kind === "videoinput");
+      if (cams.length < 2) return;
+      const currentTrack = localParticipant?.getTrackPublication(Track.Source.Camera)?.track;
+      const currentId = (currentTrack?.mediaStreamTrack.getSettings() as MediaTrackSettings & { deviceId?: string })?.deviceId;
+      const currentIdx = cams.findIndex((d) => d.deviceId === currentId);
+      const next = cams[(currentIdx + 1) % cams.length];
+      await room.switchActiveDevice("videoinput", next.deviceId);
+    } catch { /* camera flip not supported */ }
+  }, [localParticipant, room]);
+
   const disableAllCameras = useCallback(() => {
     room.localParticipant?.publishData(
       new TextEncoder().encode(JSON.stringify({ type: "disable-cameras-all" })),
@@ -307,6 +330,15 @@ export function ControlBar({
           {isCamOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
           <span className="text-[10px] leading-tight hidden sm:block">{isCamOff ? "Cam Off" : "Kamera"}</span>
         </button>
+
+        {/* ── Flip Camera (mobile only — when device has 2+ cameras) ── */}
+        {hasMultipleCams && !isCamOff && (
+          <button type="button" onClick={flipCamera} title="Balik Kamera (depan/belakang)"
+            className="flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors flex-shrink-0">
+            <RefreshCcw className="w-5 h-5" />
+            <span className="text-[10px] leading-tight hidden sm:block">Balik</span>
+          </button>
+        )}
 
         {/* ── Screen Share ── */}
         <button type="button" onClick={handleScreenShareClick} title={sharing ? "Hentikan Berbagi" : "Berbagi Layar"}
