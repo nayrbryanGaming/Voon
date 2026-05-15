@@ -191,3 +191,106 @@ body {
   .no-print { display: none !important; }
   body { background: white; color: black; }
 }
+
+/* ─── Music bar animations ───────────────────────────────── */
+@keyframes sound-bar {
+  0%   { transform: scaleY(0.25); }
+  100% { transform: scaleY(1); }
+}
+
+.music-bar-1 { height: 55%; animation: sound-bar 0.7s ease 0.00s infinite alternate; transform-origin: bottom; }
+.music-bar-2 { height: 80%; animation: sound-bar 0.7s ease 0.10s infinite alternate; transform-origin: bottom; }
+.music-bar-3 { height: 40%; animation: sound-bar 0.7s ease 0.20s infinite alternate; transform-origin: bottom; }
+.music-bar-4 { height: 95%; animation: sound-bar 0.7s ease 0.05s infinite alternate; transform-origin: bottom; }
+.music-bar-5 { height: 60%; animation: sound-bar 0.7s ease 0.15s infinite alternate; transform-origin: bottom; }
+.music-bar-6 { height: 75%; animation: sound-bar 0.7s ease 0.25s infinite alternate; transform-origin: bottom; }
+.music-bar-7 { height: 45%; animation: sound-bar 0.7s ease 0.08s infinite alternate; transform-origin: bottom; }
+
+.music-bar-sm-1 { height: 60%; animation: sound-bar 0.8s ease 0.00s infinite alternate; transform-origin: bottom; }
+.music-bar-sm-2 { height: 100%; animation: sound-bar 0.8s ease 0.20s infinite alternate; transform-origin: bottom; }
+.music-bar-sm-3 { height: 40%; animation: sound-bar 0.8s ease 0.40s infinite alternate; transform-origin: bottom; }
+
+/* ─── Side panel base styles ─────────────────────────────── */
+.voon-panel {
+  background-color: var(--voon-bg-card);
+  border-left: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+
+/* ─── No scrollbar utility ───────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ─── Screen share dialog slide-up animation ─────────────── */
+@keyframes slide-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+.animate-slide-up { animation: slide-up 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+/* ─── Performance: contain layout for video tiles ────────── */
+.lk-participant-tile,
+.voon-video-tile {
+  contain: layout style;
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* ─── Gallery grid — equal-height rows filling all available space ── */
+.voon-video-grid {
+  display: grid;
+  grid-auto-rows: 1fr;  /* equal rows regardless of content */
+  min-height: 0;        /* prevent flex overflow */
+  flex: 1;
+  gap: 6px;
+}
+
+/* Ensure LiveKit's own tiles fill their grid cells */
+.voon-video-grid .lk-participant-tile,
+.voon-video-grid .voon-video-tile {
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  width: 100%;
+}
+
+/* Fix LiveKit video element to cover the tile */
+.voon-video-tile video,
+.lk-participant-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Speaker mode main tile */
+.voon-speaker-main {
+  flex: 1;
+  min-height: 0;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+.voon-speaker-main .lk-participant-tile {
+  width: 100%;
+  height: 100%;
+}
+
+/* ─── Mobile control bar: make it feel native ────────────── */
+@media (max-width: 640px) {
+  /* Remove backdrop blur from control bar (expensive on mobile GPU) */
+  [class*="ControlBar"],
+  .voon-panel {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  /* Full-width panels on mobile */
+  .voon-panel {
+    width: 100% !important;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    z-index: 30;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+}

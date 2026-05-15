@@ -1,6 +1,6 @@
 import { getServerUserId } from "@/lib/session";
 import { NextResponse } from "next/server";
-import { cleanupCaption } from "@/lib/anthropic";
+import { cleanupCaption } from "@/lib/ai";
 
 export const maxDuration = 60;
 
