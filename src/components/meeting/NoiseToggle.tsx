@@ -107,21 +107,23 @@ export function NoiseToggle({ className }: NoiseToggleProps) {
       disabled={loading}
       title={enabled ? "Matikan Noise Cancellation" : "Aktifkan Noise Cancellation (HPF + Compressor)"}
       className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-xl transition-colors text-sm disabled:opacity-50",
+        "flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl transition-colors disabled:opacity-50 flex-shrink-0",
         enabled
           ? "bg-green-600/20 text-green-400 border border-green-500/30 hover:bg-green-600/30"
-          : "bg-white/10 text-gray-300 hover:bg-white/20 border border-transparent",
+          : "bg-white/10 text-white hover:bg-white/20",
         className
       )}
     >
       {loading ? (
-        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
       ) : enabled ? (
-        <Zap className="w-4 h-4" />
+        <Zap className="w-5 h-5" />
       ) : (
-        <Mic className="w-4 h-4" />
+        <Mic className="w-5 h-5" />
       )}
-      <span>{enabled ? "Noise Cancel ON" : "Noise Cancel"}</span>
+      <span className="text-[10px] leading-tight hidden sm:block">
+        {enabled ? "NC ON" : "Noise"}
+      </span>
     </button>
   );
 }
