@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRecording } from "@/hooks/useRecording";
+import { NoiseToggle } from "./NoiseToggle";
 import type { ScreenShareCaptureOptions } from "livekit-client";
 
 type PanelType = "chat" | "participants" | "polls" | "qa" | "invite" | "settings" | "music" | "bg";
@@ -205,10 +206,19 @@ export function ControlBar({
     room.localParticipant?.publishData(new TextEncoder().encode(JSON.stringify({ type: "raise-hand" })));
   }, [room]);
 
+  // Host: mute all mics
+  const muteAll = useCallback(() => {
+    room.localParticipant?.publishData(
+      new TextEncoder().encode(JSON.stringify({ type: "mute-all" })),
+      { reliable: true }
+    );
+  }, [room]);
+
   // Host: disable all cameras
   const disableAllCameras = useCallback(() => {
     room.localParticipant?.publishData(
-      new TextEncoder().encode(JSON.stringify({ type: "disable-cameras-all" }))
+      new TextEncoder().encode(JSON.stringify({ type: "disable-cameras-all" })),
+      { reliable: true }
     );
   }, [room]);
 
@@ -309,6 +319,9 @@ export function ControlBar({
           </button>
         )}
 
+        {/* ── Noise cancellation ── */}
+        <NoiseToggle className="flex-shrink-0" />
+
         {/* ── Push to Talk toggle ── */}
         <button type="button" onClick={() => setPushToTalk((p) => !p)}
           title={pushToTalk ? "Matikan Push-to-Talk (Spasi)" : "Aktifkan Push-to-Talk"}
@@ -405,6 +418,13 @@ export function ControlBar({
                 </button>
 
                 <div className="h-px bg-white/5 my-1" />
+
+                {/* Mute all mics */}
+                <button type="button" onClick={() => { muteAll(); setShowMore(false); }}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-orange-400 hover:bg-orange-600/20 transition-colors text-left">
+                  <MicOff className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm">Bisukan Semua Mic</span>
+                </button>
 
                 {/* Disable all cameras */}
                 <button type="button" onClick={() => { disableAllCameras(); setShowMore(false); }}
