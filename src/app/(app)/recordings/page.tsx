@@ -11,14 +11,21 @@ export default async function RecordingsPage() {
   const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) redirect("/sign-in");
-
-  const meetings = await prisma.meeting.findMany({
-    where: { hostId: user.id, isRecorded: true, recordingUrl: { not: null } },
-    orderBy: { startTime: "desc" },
-    include: { summary: { select: { topics: true } } },
+  const result = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId } }),
+    prisma.meeting.findMany({
+      where: { hostId: userId, isRecorded: true, recordingUrl: { not: null } },
+      orderBy: { startTime: "desc" },
+      include: { summary: { select: { topics: true } } },
+    }),
+  ]).catch((err) => {
+    console.error("[Recordings] DB error:", err);
+    return null;
   });
+
+  if (!result || !result[0]) redirect("/sign-in");
+
+  const [, meetings] = result;
 
   return (
     <div className="min-h-screen">

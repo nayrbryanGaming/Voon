@@ -12,20 +12,21 @@ export default async function SettingsPage() {
   const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: { campus: true },
+  const result = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, include: { campus: true } }),
+    prisma.meeting.count({ where: { hostId: userId } }),
+    prisma.attendance.count({ where: { userId } }),
+  ]).catch((err) => {
+    console.error("[Settings] DB error:", err);
+    return null;
   });
 
-  if (!user) redirect("/sign-in");
+  if (!result || !result[0]) redirect("/sign-in");
+
+  const [user, totalMeetings, totalAttended] = result;
 
   const roleLabel =
     user.role === "LECTURER" ? "Dosen" : user.role === "ADMIN" ? "Admin" : "Mahasiswa";
-
-  const [totalMeetings, totalAttended] = await Promise.all([
-    prisma.meeting.count({ where: { hostId: user.id } }),
-    prisma.attendance.count({ where: { userId: user.id } }),
-  ]);
 
   const subscriptionTier = user.subscriptionTier ?? "FREE";
   const hasToken = !!user.apiTokenEncrypted;

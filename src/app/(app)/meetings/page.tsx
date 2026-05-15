@@ -6,22 +6,31 @@ import { Topbar } from "@/components/layout/Topbar";
 import { MeetingCard } from "@/components/meeting/MeetingCard";
 import { Plus } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function MeetingsPage() {
   const session = await auth();
   const userId = session?.user?.id;
   if (!userId) redirect("/sign-in");
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) redirect("/sign-in");
-
-  const meetings = await prisma.meeting.findMany({
-    where: { hostId: user.id },
-    orderBy: { startTime: "desc" },
-    include: {
-      _count: { select: { attendance: true, participants: true } },
-      summary: { select: { summary: true } },
-    },
+  const result = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId } }),
+    prisma.meeting.findMany({
+      where: { hostId: userId },
+      orderBy: { startTime: "desc" },
+      include: {
+        _count: { select: { attendance: true, participants: true } },
+        summary: { select: { summary: true } },
+      },
+    }),
+  ]).catch((err) => {
+    console.error("[Meetings] DB error:", err);
+    return null;
   });
+
+  if (!result || !result[0]) redirect("/sign-in");
+
+  const [user, meetings] = result;
 
   return (
     <div className="min-h-screen">

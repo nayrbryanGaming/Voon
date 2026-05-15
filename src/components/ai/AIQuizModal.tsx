@@ -25,18 +25,24 @@ export function AIQuizModal({ onClose }: AIQuizModalProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          transcript: transcript.join("\n") || "Materi perkuliahan",
+          transcript: transcript.join("\n") || "Materi perkuliahan umum untuk ujian",
           topic: "Materi Meeting",
           difficulty,
         }),
       });
-      if (!res.ok) throw new Error("Gagal membuat kuis");
       const data = await res.json();
+      if (!res.ok) {
+        if (res.status === 503 || (data?.error as string)?.includes("dikonfigurasi")) {
+          throw new Error("AI belum dikonfigurasi. Minta admin set GROQ_API_KEY di Vercel.");
+        }
+        throw new Error(data?.error ?? "Gagal membuat kuis");
+      }
+      if (!data.questions?.length) throw new Error("AI tidak menghasilkan soal. Coba lagi.");
       setQuiz(data);
       setAnswers(new Array(data.questions.length).fill(-1));
       setStep("quiz");
-    } catch {
-      setError("Gagal membuat kuis. Coba lagi.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal membuat kuis. Coba lagi.");
       setStep("config");
     }
   };

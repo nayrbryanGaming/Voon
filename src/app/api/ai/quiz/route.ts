@@ -41,6 +41,10 @@ export async function POST(req: NextRequest) {
     return withSecureHeaders(NextResponse.json(data));
   } catch (err) {
     console.error("AI quiz error:", err);
-    return withSecureHeaders(NextResponse.json({ error: "AI service error" }, { status: 500 }));
+    const msg = err instanceof Error ? err.message : "AI service error";
+    const isNotConfigured = msg.includes("dikonfigurasi") || msg.includes("not configured");
+    return withSecureHeaders(
+      NextResponse.json({ error: msg }, { status: isNotConfigured ? 503 : 500 })
+    );
   }
 }
